@@ -18,14 +18,29 @@ class Server:
     INPUTS = []
     OUTPUTS = []
     MESSAGES = {}
-    
+
     def parse(self):
-        """ Parse the arguments """
+        """ Parse the arguments"""
+
+        parser = argparse.ArgumentParser()
+
+        # required arguments
+        parser.add_argument('port', type=int)
+        parser.add_argument('secretkey')
+        
+        arguments = parser.parse_args()
+
+        self.PORT = arguments.port
+        self.SECRET_KEY = arguments.secretkey
+
         return
+
 
     def setup(self):
         """ Setup the server """
-
+        # get parsed arguments
+        self.parse()
+        
         # setup the server socket
         self.SVR_SOCKET = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.SVR_SOCKET.setblocking(0)
@@ -35,11 +50,11 @@ class Server:
 
     def run(self):
         """ Run the server """
-        
+
         # Logging messages
-        print("Listening on port: " + self.PORT)
+        print("Listening on port: " + str(self.PORT))
         print("Using the secret key: " + self.SECRET_KEY)
-        
+
         # Start listening for clients
         self.SVR_SOCKET.listen(5)
         self.INPUTS.append(self.SVR_SOCKET)
@@ -114,3 +129,11 @@ class Server:
                 # close socket
                 sckt.close()
         return
+
+# run
+if __name__ == "__main__":
+    svr = Server()
+    svr.setup()
+
+    while True:
+        svr.run()
