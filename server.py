@@ -8,6 +8,7 @@ import queue
 import argparse
 import time
 import datetime
+import uuid
 
 class Server:
     """ Server Class """
@@ -19,6 +20,7 @@ class Server:
     INPUTS = []
     OUTPUTS = []
     MESSAGES = {}
+    CLIENTS = {}
 
     def parse(self):
         """ Parse the arguments"""
@@ -56,6 +58,29 @@ class Server:
         return
 
 
+    def handshake(self, data, client):
+        """ Guides through the initial steps of the protocol """
+
+        # receive nonce and cipher from client
+        data = data.split(" ")
+        cipher = data[0]
+        nonce = data[0]
+
+        # TODO generate IVs and session-keys from nonce and cipher
+
+        # change client status to authenticate
+        self.CLIENTS[client]['status'] = "AUTHENTICATE"
+
+    def challenge(self, data, client):
+        """ Generate challenge for client """
+        
+        # reference: https://stackoverflow.com/questions/37675280/how-to-generate-a-ranstring
+        challenge = uuid.uuid4().hex
+
+        # change client status
+        self.CLIENTS[client]['status'] = "CHALLENGED"
+    
+
     def run(self):
         """ Run the server """
 
@@ -78,23 +103,42 @@ class Server:
                     # accept a connection
                     connection, client_addr = sckt.accept()
                     connection.setblocking(0)
+
+                    # add connection to the arrays
                     self.INPUTS.append(connection)
                     self.MESSAGES[connection] = queue.Queue()
+                    self.CLIENTS[connection] = None
 
                     # Log the ip of client
                     print(self.timestamp() + " - New connection from: " + client_addr[0])
-                
+
                 # client
                 else:
-                    data = sckt.recv(1024)
+                    data = scktchecjk if.recv(1024)
 
                     # data to be received
                     if data:
-                        # put data in the queue
-                        self.MESSAGES[sckt].put(data)
 
-                        if sckt not in self.OUTPUTS:
-                            self.OUTPUTS.append(sckt)
+                        # check if handshake done
+                        if self.CLIENTS[sckt] is None:
+                            self.handshake(data, sckt)
+
+                        # check if not yet authenticated
+                        elif self.CLIENTS[sckt]['status'] == "AUTHENTICATE"
+                            
+                            # create a challenge
+                            challenge = self.challenge()
+
+                            # put the challenge onto the queue
+                            self.MESSAGES[sckt].put(bytearray(challenge, "utf-8"))
+                            
+                        # can freely communicate
+                        else:
+                            # put data in the queue
+                            self.MESSAGES[sckt].put(data)
+
+                            if sckt not in self.OUTPUTS:
+                                self.OUTPUTS.append(sckt)
 
                     # no more data = close connection
                     else: 
@@ -110,6 +154,9 @@ class Server:
 
                         # remove from message queue
                         del self.MESSAGES[sckt]
+
+                        # close the socket
+                        sckt.close()
 
             # go through outputs
             for sckt in writable:
@@ -137,7 +184,7 @@ class Server:
 
                 # close socket
                 sckt.close()
-        return
+
 
 def run():
     """ Run the server """
