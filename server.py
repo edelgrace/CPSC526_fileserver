@@ -69,7 +69,7 @@ class Server:
         """ Close a connection to a client """
 
         # Log connection closing
-        print(self.timestamp() + "Closed connection: " + str(sckt))
+        print(self.timestamp() + "Closed connection: " + str(sckt.getsockname()[0]))
 
         # remove from outputs
         if sckt in self.OUTPUTS:
@@ -83,16 +83,24 @@ class Server:
 
     def handshake(self, data, client):
         """ Guides through the initial steps of the protocol """
-
+        print("DEBUG handshake started")
         # receive nonce and cipher from client
         data = data.decode("utf-8")
         data = data.split(" ")
 
         # check if nonce and cipher really sent
-        if len(data) > 2:
+        if len(data) != 2:
             # set the error message and state
             self.CLIENTS[client]['status'] = "CLOSE"
-            self.CLIENTS[client]['error'] = "Error: Authentication failed"
+            error = "Error: Authentication failed"
+            
+            # put error on queue
+            self.MESSAGES[client].put(bytearray(error, "utf-8"))
+
+            if client not in self.OUTPUTS:
+                self.OUTPUTS.append(client)
+                
+            print("DEBUG handshake error")
 
             return
 
@@ -107,14 +115,20 @@ class Server:
         # reference: https://stackoverflow.com/questions/37675280/how-to-generate-a-ranstring
         challenge = uuid.uuid4().hex
         self.CLIENTS[client]['challenge'] = challenge
+        print("DEBUG handshake challenge")
 
         # put challenge onto the clients queue
         challenge = "You have been challenged: " + challenge
 
         self.MESSAGES[client].put(bytearray(challenge, "utf-8"))
+        
+        if client not in self.OUTPUTS:
+            self.OUTPUTS.append(client)
 
         # change client status
         self.CLIENTS[client]['status'] = "CHALLENGED"
+
+        return
 
     def challenged(self, data, client):
         """ Receive challenge and compute response """
@@ -143,7 +157,7 @@ class Server:
 
             # go through inputs
             for sckt in readable:
-
+                print("DEBUG input" + sckt.getsockname()[0])
                 # server
                 if sckt is self.SVR_SOCKET:
                     # accept a connection
@@ -161,6 +175,7 @@ class Server:
                 # client
                 else:
                     data = sckt.recv(1024)
+                    print("DEBUG data")
 
                     # data to be received
                     if data:
@@ -168,20 +183,22 @@ class Server:
                         if self.CLIENTS[sckt] == {}:
                             print(self.timestamp() + "Commencing handshake")
                             self.handshake(data, sckt)
+                            print("DEBUG handshake exited")
 
                         # handshake already started or completed
                         else:
                             if self.CLIENTS[sckt]['status'] == "CHALLENGED":
-                                print("challenged")
+                                print("DEBUG challenged")
                                 self.challenged(data, sckt)
 
                             # close connection if error
                             if self.CLIENTS[sckt]['status'] == "CLOSE":
-                                print("error")
+                                print("DEBUG error")
                                 self.closeSocket(sckt)
 
                             # client can freely communicate
                             else:
+                                print("DEBUG free")
                                 # put data in the queue
                                 self.MESSAGES[sckt].put(data)
 
@@ -191,11 +208,14 @@ class Server:
 
                     # no more data = close connection
                     else: 
+                        print("DEBUG close")
                         self.closeSocket(sckt)
+        
+                pass
 
             # go through outputs
             for sckt in writable:
-
+                print("DEBUG input" + sckt.getsockname()[0])
                 try:
                     # grab the next message
                     next_msg = self.MESSAGES[sckt].get_nowait()
@@ -206,12 +226,12 @@ class Server:
                 else:
                     try:
                         # send the message
-                        print(next_msg)
                         sckt.send(next_msg)
+                    except Exception as e:
+                        print(str(e))
                     finally:
                         # close connection if error
                         if self.CLIENTS[sckt]['status'] == "CLOSE":
-                            print("error")
                             self.closeSocket(sckt)
 
 
