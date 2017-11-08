@@ -65,7 +65,7 @@ class Server:
         return
 
 
-    def closeSocket(self, socket):
+    def closeSocket(self, sckt):
         """ Close a connection to a client """
 
         # Log connection closing
@@ -96,7 +96,6 @@ class Server:
 
             return
 
-
         cipher = data[0]
         nonce = data[1]
 
@@ -124,8 +123,6 @@ class Server:
         data = data.decode("utf-8")
         data = data.split(":")
 
-
-
         challenge = data 
 
         # computer the response to the challenge
@@ -142,7 +139,7 @@ class Server:
         self.INPUTS.append(self.SVR_SOCKET)
 
         while self.INPUTS:
-            readable, writable, error = select.select(self.INPUTS, self.OUTPUTS, self.INPUTS)
+            readable, writable, error = select.select(self.INPUTS, self.OUTPUTS, self.INPUTS, 0)
 
             # go through inputs
             for sckt in readable:
@@ -167,35 +164,34 @@ class Server:
 
                     # data to be received
                     if data:
-
                         # start handshake
-                        if self.CLIENTS[sckt] is {}:
+                        if self.CLIENTS[sckt] == {}:
                             print(self.timestamp() + "Commencing handshake")
                             self.handshake(data, sckt)
 
-                        # calculate challenge
-                        elif self.CLIENTS[sckt]['status'] == "CHALLENGED":
-                            self.challengeresponse(data, sckt)
-
-
-                        # close connection if error
-                        elif self.CLIENTS[sck]['status'] == "CLOSE":
-                            # send message to client
-                            msg = self.CLIENTS[sckt]['error']
-                            self.MESSAGES[sckt].put(bytearray(msg, "utf-8"))
-
-                        # client can freely communicate
+                        # handshake already started or completed
                         else:
-                            # put data in the queue
-                            self.MESSAGES[sckt].put(data)
+                            if self.CLIENTS[sckt]['status'] == "CHALLENGED":
+                                print("challenged")
+                                self.challenged(data, sckt)
 
-                            # add to output list
-                            if sckt not in self.OUTPUTS:
-                                self.OUTPUTS.append(sckt)
+                            # close connection if error
+                            if self.CLIENTS[sckt]['status'] == "CLOSE":
+                                print("error")
+                                self.closeSocket(sckt)
+
+                            # client can freely communicate
+                            else:
+                                # put data in the queue
+                                self.MESSAGES[sckt].put(data)
+
+                                # add to output list
+                                if sckt not in self.OUTPUTS:
+                                    self.OUTPUTS.append(sckt)
 
                     # no more data = close connection
                     else: 
-                        self.closeSocket(sck)
+                        self.closeSocket(sckt)
 
             # go through outputs
             for sckt in writable:
@@ -208,23 +204,30 @@ class Server:
                     self.OUTPUTS.remove(sckt)
 
                 else:
-                    # send the message
-                    sckt.send(next_msg)
+                    try:
+                        # send the message
+                        print(next_msg)
+                        sckt.send(next_msg)
+                    finally:
+                        # close connection if error
+                        if self.CLIENTS[sckt]['status'] == "CLOSE":
+                            print("error")
+                            self.closeSocket(sckt)
+
 
             # go through errors
-            for sckt in error:
+            # for sckt in error:
                 # remove from inputs
-                self.INPUTS.remove(sckt)
+                # self.INPUTS.remove(sckt)
 
                 # remove from outputs
-                if sckt not in self.OUTPUTS:
-                    self.OUTPUTS.remove(sckt)
+                # if sckt not in self.OUTPUTS:
+                    # self.OUTPUTS.remove(sckt)
 
                 # remove from message queue
-                del self.MESSAGES[sckt]
+                # del self.MESSAGES[sckt]
 
                 # close socket
-                sckt.close()
 
 
 def run():
