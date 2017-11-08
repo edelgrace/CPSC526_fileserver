@@ -17,8 +17,10 @@ class Server:
     PORT = 0
     SVR_SOCKET = None
     SECRET_KEY = None
+
     INPUTS = []
     OUTPUTS = []
+
     MESSAGES = {}
     CLIENTS = {}
 
@@ -41,9 +43,14 @@ class Server:
 
     def timestamp(self):
         """ Return current time """
+
+        # get the current time
         timestamp = datetime.datetime.now().time()
-        
-        return timestamp.strftime("%H:%M:%S")
+        timestamp = timestamp.strftime("%H:%M:%S")
+
+        # return timestamp
+        return(timestamp + " - ")
+
 
     def setup(self):
         """ Setup the server """
@@ -58,28 +65,70 @@ class Server:
         return
 
 
+    def closeSocket(self, socket):
+        """ Close a connection to a client """
+
+        # Log connection closing
+        print(self.timestamp() + "Closed connection: " + str(sckt))
+
+        # remove from outputs
+        if sckt in self.OUTPUTS:
+            self.OUTPUTS.remove(sckt)
+        
+        # remove from inputs
+        self.INPUTS.remove(sckt)
+
+        # close the socket
+        sckt.close()
+
     def handshake(self, data, client):
         """ Guides through the initial steps of the protocol """
 
         # receive nonce and cipher from client
+        data = data.decode("utf-8")
         data = data.split(" ")
+
+        # check if nonce and cipher really sent
+        if len(data) > 2:
+            # set the error message and state
+            self.CLIENTS[client]['status'] = "CLOSE"
+            self.CLIENTS[client]['error'] = "Error: Authentication failed"
+
+            return
+
+
         cipher = data[0]
-        nonce = data[0]
+        nonce = data[1]
 
         # TODO generate IVs and session-keys from nonce and cipher
+        self.CLIENTS[client]['IV'] = None
+        self.CLIENTS[client]['sessionkey'] = None
 
-        # change client status to authenticate
-        self.CLIENTS[client]['status'] = "AUTHENTICATE"
-
-    def challenge(self, data, client):
-        """ Generate challenge for client """
-        
+        # generate a challenge
         # reference: https://stackoverflow.com/questions/37675280/how-to-generate-a-ranstring
         challenge = uuid.uuid4().hex
+        self.CLIENTS[client]['challenge'] = challenge
+
+        # put challenge onto the clients queue
+        challenge = "You have been challenged: " + challenge
+
+        self.MESSAGES[client].put(bytearray(challenge, "utf-8"))
 
         # change client status
         self.CLIENTS[client]['status'] = "CHALLENGED"
-    
+
+    def challenged(self, data, client):
+        """ Receive challenge and compute response """
+
+        # receive the challenge
+        data = data.decode("utf-8")
+        data = data.split(":")
+
+
+
+        challenge = data 
+
+        # computer the response to the challenge
 
     def run(self):
         """ Run the server """
@@ -107,67 +156,59 @@ class Server:
                     # add connection to the arrays
                     self.INPUTS.append(connection)
                     self.MESSAGES[connection] = queue.Queue()
-                    self.CLIENTS[connection] = None
+                    self.CLIENTS[connection] = {}
 
                     # Log the ip of client
-                    print(self.timestamp() + " - New connection from: " + client_addr[0])
+                    print(self.timestamp() + "New connection from: " + client_addr[0])
 
                 # client
                 else:
-                    data = scktchecjk if.recv(1024)
+                    data = sckt.recv(1024)
 
                     # data to be received
                     if data:
 
-                        # check if handshake done
-                        if self.CLIENTS[sckt] is None:
+                        # start handshake
+                        if self.CLIENTS[sckt] is {}:
+                            print(self.timestamp() + "Commencing handshake")
                             self.handshake(data, sckt)
 
-                        # check if not yet authenticated
-                        elif self.CLIENTS[sckt]['status'] == "AUTHENTICATE"
-                            
-                            # create a challenge
-                            challenge = self.challenge()
+                        # calculate challenge
+                        elif self.CLIENTS[sckt]['status'] == "CHALLENGED":
+                            self.challengeresponse(data, sckt)
 
-                            # put the challenge onto the queue
-                            self.MESSAGES[sckt].put(bytearray(challenge, "utf-8"))
-                            
-                        # can freely communicate
+
+                        # close connection if error
+                        elif self.CLIENTS[sck]['status'] == "CLOSE":
+                            # send message to client
+                            msg = self.CLIENTS[sckt]['error']
+                            self.MESSAGES[sckt].put(bytearray(msg, "utf-8"))
+
+                        # client can freely communicate
                         else:
                             # put data in the queue
                             self.MESSAGES[sckt].put(data)
 
+                            # add to output list
                             if sckt not in self.OUTPUTS:
                                 self.OUTPUTS.append(sckt)
 
                     # no more data = close connection
                     else: 
-                        # Log connection closing
-                        print(self.timestamp() + "Closed connection: " + str(sckt))
-
-                        # remove from outputs
-                        if sckt in self.OUTPUTS:
-                            self.OUTPUTS.remove(sckt)
-                        
-                        # remove from inputs
-                        self.INPUTS.remove(sckt)
-
-                        # remove from message queue
-                        del self.MESSAGES[sckt]
-
-                        # close the socket
-                        sckt.close()
+                        self.closeSocket(sck)
 
             # go through outputs
             for sckt in writable:
 
                 try:
+                    # grab the next message
                     next_msg = self.MESSAGES[sckt].get_nowait()
 
                 except queue.Empty:
                     self.OUTPUTS.remove(sckt)
 
                 else:
+                    # send the message
                     sckt.send(next_msg)
 
             # go through errors
