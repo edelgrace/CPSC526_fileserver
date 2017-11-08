@@ -6,6 +6,7 @@ import os
 import sys
 import queue
 import argparse
+import time
 import datetime
 
 class Server:
@@ -35,6 +36,12 @@ class Server:
 
         return
 
+
+    def timestamp(self):
+        """ Return current time """
+        timestamp = datetime.datetime.now().time()
+        
+        return timestamp.strftime("%H:%M:%S")
 
     def setup(self):
         """ Setup the server """
@@ -72,9 +79,10 @@ class Server:
                     connection, client_addr = sckt.accept()
                     connection.setblocking(0)
                     self.INPUTS.append(connection)
+                    self.MESSAGES[connection] = queue.Queue()
 
                     # Log the ip of client
-                    print(str(datetime.datetime.now()) + "New onnection from: " + client_addr)
+                    print(self.timestamp() + " - New connection from: " + client_addr[0])
                 
                 # client
                 else:
@@ -86,12 +94,12 @@ class Server:
                         self.MESSAGES[sckt].put(data)
 
                         if sckt not in self.OUTPUTS:
-                            self.OUTPUTS.append()
+                            self.OUTPUTS.append(sckt)
 
                     # no more data = close connection
                     else: 
                         # Log connection closing
-                        print(str(datetime.datetime.now()) + "Closed connection: " + str(sckt))
+                        print(self.timestamp() + "Closed connection: " + str(sckt))
 
                         # remove from outputs
                         if sckt in self.OUTPUTS:
