@@ -40,13 +40,14 @@ class Server:
         """ Setup the server """
         # get parsed arguments
         self.parse()
-        
+
         # setup the server socket
         self.SVR_SOCKET = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.SVR_SOCKET.setblocking(0)
         self.SVR_SOCKET.bind((self.IP_ADDR, self.PORT))
 
         return
+
 
     def run(self):
         """ Run the server """
@@ -110,7 +111,7 @@ class Server:
 
                 except queue.Empty:
                     self.OUTPUTS.remove(sckt)
-                
+
                 else:
                     sckt.send(next_msg)
 
@@ -130,10 +131,14 @@ class Server:
                 sckt.close()
         return
 
-# run
-if __name__ == "__main__":
+def run():
+    """ Run the server """
     svr = Server()
     svr.setup()
 
     while True:
         svr.run()
+
+# run the program
+if __name__ == "__main__":
+    run()
