@@ -54,6 +54,16 @@ class Server:
         # return timestamp
         return(timestamp + " - ")
 
+    def sendMsg(self, data, sckt):
+        """ Function to send message to a socket """
+        
+        # put message on queue
+        self.MESSAGES[sckt].put(bytearray(data,"utf-8"))
+
+        # add to the outputs
+        if sckt not in self.OUTPUTS:
+            self.OUTPUTS.append(sckt)
+
 
     def setup(self):
         """ Setup the server """
@@ -98,11 +108,8 @@ class Server:
             error = "Error: Cipher and nonce not sent"
             
             # put error on queue
-            self.MESSAGES[client].put(bytearray(error, "utf-8"))
+            self.sendMsg(error, client)
 
-            if client not in self.OUTPUTS:
-                self.OUTPUTS.append(client)
-                
             print("DEBUG handshake error")
 
             return
@@ -123,10 +130,7 @@ class Server:
         # put challenge onto the clients queue
         challenge = "You have been challenged: " + challenge + "\n"
 
-        self.MESSAGES[client].put(bytearray(challenge, "utf-8"))
-        
-        if client not in self.OUTPUTS:
-            self.OUTPUTS.append(client)
+        self.sendMsg(challenge, client)
 
         # change client status
         self.CLIENTS[client]['status'] = "CHALLENGED"
@@ -143,10 +147,12 @@ class Server:
         challenge = data[1] + self.SECRET_KEY
         
         # compute the response to the challenge
-        my_response = hashlib.sha224(challenge.encode("utf-8"))
+        my_response = hashlib.sha224(challenge.encode("utf-8")).hexdigest()
+
+        print("DEBUG " + my_response)
 
         # put message on queue
-        self.MESSAGES[client].put(my_response)
+        self.sendMsg(my_response, client)
 
         # change state to response
         self.CLIENTS[client]['status'] = "RESPONSE"
@@ -217,11 +223,7 @@ class Server:
                             else:
                                 print("DEBUG free")
                                 # put data in the queue
-                                self.MESSAGES[sckt].put(data)
-
-                                # add to output list
-                                if sckt not in self.OUTPUTS:
-                                    self.OUTPUTS.append(sckt)
+                                self.sendMsg(data, sckt)
 
                     # no more data = close connection
                     else: 
