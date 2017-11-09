@@ -149,13 +149,35 @@ class Server:
         # compute the response to the challenge
         my_response = hashlib.sha224(challenge.encode("utf-8")).hexdigest()
 
-        print("DEBUG " + my_response)
+
 
         # put message on queue
+        my_response = "Server response: " + my_response
         self.sendMsg(my_response, client)
 
         # change state to response
         self.CLIENTS[client]['status'] = "RESPONSE"
+
+        return
+
+    def response(self, data, client):
+        # get response from client
+        data = data.encode("utf-8")
+        data = data.split(": ")
+        response = data[1].strip("\n")
+
+        # compute the client challenge
+        challenge = hashlib.sha224(self.CLIENTS[client['challenge']].encode("utf-8") + self.SECRET_KEY)
+
+        # challenge correct
+        if challenge == response:
+            self.CLIENTS[client]['status'] = "FREE"
+            self.sendMsg("OK Challenge correct", client)
+
+        # challenge not done correctly
+        else:
+            self.CLIENTS[client]['status'] = "ERROR"
+            self.sendMsg("Error: The response to the challenge was wrong", client)
 
         return
 
@@ -218,6 +240,8 @@ class Server:
 
                             elif self.CLIENTS[sckt]['status'] == "RESPONSE":
                                 print("DEBUG response")
+                                self.response(data, sckt)
+                                print("DEBUG finish response")
 
                             # client can freely communicate
                             else:
