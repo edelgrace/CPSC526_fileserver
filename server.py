@@ -149,10 +149,8 @@ class Server:
         # compute the response to the challenge
         my_response = hashlib.sha224(challenge.encode("utf-8")).hexdigest()
 
-
-
         # put message on queue
-        my_response = "Server response: " + my_response
+        my_response = "Server response: " + my_response + "\n"
         self.sendMsg(my_response, client)
 
         # change state to response
@@ -162,22 +160,29 @@ class Server:
 
     def response(self, data, client):
         # get response from client
-        data = data.encode("utf-8")
+        data = data.decode("utf-8")
         data = data.split(": ")
         response = data[1].strip("\n")
 
         # compute the client challenge
-        challenge = hashlib.sha224(self.CLIENTS[client['challenge']].encode("utf-8") + self.SECRET_KEY)
+        challenge = self.CLIENTS[client]['challenge'] + self.SECRET_KEY
+        
+        print("DEBUG challenge " + challenge)
+        
+        challenge = hashlib.sha224(challenge.encode("utf-8")).hexdigest()
+
+        print("DEBUG computed " + challenge)
+        print("DEBUG response " + response)
 
         # challenge correct
         if challenge == response:
             self.CLIENTS[client]['status'] = "FREE"
-            self.sendMsg("OK Challenge correct", client)
+            self.sendMsg("OK Challenge correct\n", client)
 
         # challenge not done correctly
         else:
-            self.CLIENTS[client]['status'] = "ERROR"
-            self.sendMsg("Error: The response to the challenge was wrong", client)
+            self.CLIENTS[client]['status'] = "CLOSE"
+            self.sendMsg("Error: The response to the challenge was wrong\n", client)
 
         return
 
@@ -276,6 +281,7 @@ class Server:
                         # close connection if error
                         if self.CLIENTS[sckt]['status'] == "CLOSE":
                             self.closeSocket(sckt)
+                            print("DEBUG error")
 
 
 def run():
