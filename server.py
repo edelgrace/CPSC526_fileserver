@@ -56,7 +56,12 @@ class Server:
 
     def sendMsg(self, data, sckt):
         """ Function to send message to a socket """
+        if isinstance(data, (bytes, bytearray)):
+            data = data.decode("utf-8")
+            
+        # TODO Check which cipher is used
         
+            
         # put message on queue
         self.MESSAGES[sckt].put(bytearray(data,"utf-8"))
 
@@ -154,11 +159,11 @@ class Server:
         self.sendMsg(my_response, client)
 
         # change state to response
-        self.CLIENTS[client]['status'] = "RESPONSE"
+        self.CLIENTS[client]['status'] = "CLI-RESPONSE"
 
         return
 
-    def response(self, data, client):
+    def cliResponse(self, data, client):
         # get response from client
         data = data.decode("utf-8")
         data = data.split(": ")
@@ -176,8 +181,9 @@ class Server:
 
         # challenge correct
         if challenge == response:
-            self.CLIENTS[client]['status'] = "FREE"
+            self.CLIENTS[client]['status'] = "SVR-RESPONSE"
             self.sendMsg("OK Challenge correct\n", client)
+            print(self.timestamp() + " Client knows the secret key")
 
         # challenge not done correctly
         else:
@@ -185,8 +191,55 @@ class Server:
             self.sendMsg("Error: The response to the challenge was wrong\n", client)
 
         return
+        
+    def svrResponse(self, data, client):
+        """ Check if the server had a correct response """
+        
+        # get the client response
+        data = data.decode("utf-8")
+        data = data.strip("\n")
+        
+        # the key was computed correctly
+        if data == "OK":
+            self.CLIENTS[client]['status'] = "FREE"
+            self.sendMsg("OK Challenge correct\n", client)
+            print(self.timestamp() + "Server knows the server key")
+        
+        # the key was not computer correctly
+        else:
+            self.CLIENTS[client]['status'] = "CLOSE"
+            self.sendMsg("ERROR Server did not compute challenge correctly")
+            print(self.timestamp() + "Server does not know the server key?")
 
+
+    def operationRequest(self, data, client):
+        """ Handle the client request """
+        
+        # get the request
+        data = data.decode("utf-8").strip("\n")
+        data = data.split(" ")
+        
+        operation = data[0]
+        filename = data[1]
+        
+        # operation is to write a file
+        if operation == "write":
+            self.writeFile(client, filename)
+            
+        # operation is to read a file
+        else:
+            self.readFile(client, filename)
+            
+    def writeFile(self, client, filename):
+        """ Write a file to server """
+        return
+            
+    def readFile(self, client, filename):
+        """ Read a file from server """
+        return
+            
     def run(self):
+        
         """ Run the server """
 
         # Logging messages
@@ -243,10 +296,14 @@ class Server:
                                 self.challenged(data, sckt)
                                 print("DEBUG finish challenge")
 
-                            elif self.CLIENTS[sckt]['status'] == "RESPONSE":
+                            elif self.CLIENTS[sckt]['status'] == "CLI-RESPONSE":
                                 print("DEBUG response")
-                                self.response(data, sckt)
+                                self.cliResponse(data, sckt)
                                 print("DEBUG finish response")
+                                
+                            elif self.CLIENTS[sckt]['status'] == "SVR-RESPONSE":
+                                print("DEBUG server response")
+                                self.svrResponse(data, sckt)
 
                             # client can freely communicate
                             else:
