@@ -9,6 +9,9 @@ import argparse
 import time
 import datetime
 import uuid
+import hashlib
+from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+from cryptography.hazmat.backends import default_backend
 
 class Server:
     """ Server Class """
@@ -92,7 +95,7 @@ class Server:
         if len(data) != 2:
             # set the error message and state
             self.CLIENTS[client]['status'] = "CLOSE"
-            error = "Error: Authentication failed"
+            error = "Error: Cipher and nonce not sent"
             
             # put error on queue
             self.MESSAGES[client].put(bytearray(error, "utf-8"))
@@ -118,7 +121,7 @@ class Server:
         print("DEBUG handshake challenge")
 
         # put challenge onto the clients queue
-        challenge = "You have been challenged: " + challenge
+        challenge = "You have been challenged: " + challenge + "\n"
 
         self.MESSAGES[client].put(bytearray(challenge, "utf-8"))
         
@@ -135,11 +138,20 @@ class Server:
 
         # receive the challenge
         data = data.decode("utf-8")
-        data = data.split(":")
+        data = data.split(": ")
+        
+        challenge = data[1] + self.SECRET_KEY
+        
+        # compute the response to the challenge
+        my_response = hashlib.sha224(challenge.encode("utf-8"))
 
-        challenge = data 
+        # put message on queue
+        self.MESSAGES[client].put(my_response)
 
-        # computer the response to the challenge
+        # change state to response
+        self.CLIENTS[client]['status'] = "RESPONSE"
+
+        return
 
     def run(self):
         """ Run the server """
@@ -176,6 +188,7 @@ class Server:
                 else:
                     data = sckt.recv(1024)
                     print("DEBUG data")
+                    print("DEBUG " + str(self.CLIENTS[sckt]))
 
                     # data to be received
                     if data:
@@ -187,14 +200,18 @@ class Server:
 
                         # handshake already started or completed
                         else:
-                            if self.CLIENTS[sckt]['status'] == "CHALLENGED":
-                                print("DEBUG challenged")
-                                self.challenged(data, sckt)
-
                             # close connection if error
                             if self.CLIENTS[sckt]['status'] == "CLOSE":
                                 print("DEBUG error")
                                 self.closeSocket(sckt)
+
+                            elif self.CLIENTS[sckt]['status'] == "CHALLENGED":
+                                print("DEBUG challenged")
+                                self.challenged(data, sckt)
+                                print("DEBUG finish challenge")
+
+                            elif self.CLIENTS[sckt]['status'] == "RESPONSE":
+                                print("DEBUG response")
 
                             # client can freely communicate
                             else:
@@ -233,21 +250,6 @@ class Server:
                         # close connection if error
                         if self.CLIENTS[sckt]['status'] == "CLOSE":
                             self.closeSocket(sckt)
-
-
-            # go through errors
-            # for sckt in error:
-                # remove from inputs
-                # self.INPUTS.remove(sckt)
-
-                # remove from outputs
-                # if sckt not in self.OUTPUTS:
-                    # self.OUTPUTS.remove(sckt)
-
-                # remove from message queue
-                # del self.MESSAGES[sckt]
-
-                # close socket
 
 
 def run():
