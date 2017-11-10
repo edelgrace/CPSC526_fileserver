@@ -267,7 +267,7 @@ class Server:
                         padding = 128 - len(content)
                         count = padding
                         while count < 128:
-                            content += " "
+                            content += b" "
 
                     print("DEBUG reading-" + str(content))
 
