@@ -385,6 +385,11 @@ class Server:
                                 
                                 self.done(data, sckt)
 
+                            elif data.decode("utf-8").split() == "END":
+                                print("CLIENT SENT END")
+                            else:
+                                print("____________HELP" + data.decode("utf-8"))
+
                     # no more data = close connection
                     else: 
                         print("DEBUG close")
