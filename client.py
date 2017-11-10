@@ -56,7 +56,7 @@ class Client:
 
     def setup(self):
         """ Setup the client """
-
+        print("DEBUG setup")
         # get parsed arguments
         self.parse()
 
@@ -178,23 +178,29 @@ class Client:
 
     def receiving(self, data):
         """ Receive data from the server """
-        
-        # parse data
         data = data.decode("utf-8")
 
         # write to stdout
         sys.stdout.write(data)
+        # sys.stdout.flush()
 
         # write to a file
         # reference: https://pages.cpsc.ucalgary.ca/~henrique.pereira/pdfs/read.py
         with open(self.FILENAME, 'wb') as file:
-            content = None
+            file.write(bytearray(data,"utf-8"))
 
-            while content != b'' or content != None:
-                file.write(content)
+            # file.flush()
+
+            file.close()
+
+        self.CLI_SOCKET.send(bytearray("OK","utf-8"))
+
+        return
 
     def run(self):
         """ Run the client """
+
+        print("DEBUG run loop")
 
         try:
             while True:
@@ -242,6 +248,7 @@ class Client:
 
                 # no more data, close connection
                 else:
+                    print("DEBUG closed")
                     print("Disconnected")
                     sys.exit(0)
 
@@ -260,8 +267,11 @@ def run():
 
 # run the program
 if __name__ == "__main__":
+    print("DEBUG running")
     try:
         run()
     except KeyboardInterrupt:
         print("Disconnected")
         sys.exit(0)
+    # except Exception as e:
+    #     print(str(e))

@@ -272,11 +272,12 @@ class Server:
                     self.send_msg(content, client)
 
                 # change the state to close
-                self.CLIENTS[client]['status'] = "CLOSE"
-                self.CLIENTS[client]['error'] = "File download successful"
+                # self.CLIENTS[client]['status'] = "CLOSE"
+                # self.CLIENTS[client]['error'] = "File download successful"
 
         # error occured
         except IOError as error:
+            print("DEBUG error")
             error = str(error) + "\n"
 
             self.send_msg(error, client)
