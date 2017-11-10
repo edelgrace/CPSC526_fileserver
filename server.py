@@ -299,6 +299,8 @@ class Server:
             self.send_msg("END", "utf-8")
             self.CLIENTS[client]['status'] = "CLOSE"
 
+        return
+
     def run(self):
 
         """ Run the server """

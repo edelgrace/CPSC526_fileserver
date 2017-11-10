@@ -180,7 +180,7 @@ class Client:
         """ Receive data from the server """
         data = data.decode("utf-8").strip()
 
-        if data == "File download successful":
+        if "File download successful" in data:
             self.CLI_SOCKET.send(bytearray("END", "utf-8"))
             
             print("DEBUG download successful?")
