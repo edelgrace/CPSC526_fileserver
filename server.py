@@ -270,7 +270,7 @@ class Server:
                     print("DEBUG reading-" + str(content))
 
                     self.send_msg(content, client)
-
+                self.STATE = "DONE"
         # error occured
         except IOError as error:
             print("DEBUG error")
