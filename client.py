@@ -180,7 +180,7 @@ class Client:
         """ Receive data from the server """
         data = data.decode("utf-8").strip()
 
-        if "File download successful" in data:
+        if data == "END":
             self.CLI_SOCKET.send(bytearray("END", "utf-8"))
             
             print("DEBUG download successful?")
@@ -188,6 +188,7 @@ class Client:
             self.STATE = "DONE"
 
             return
+        
         # write to stdout
         sys.stdout.write(data)
         # sys.stdout.flush()
@@ -213,7 +214,8 @@ class Client:
                 data = self.CLI_SOCKET.recv(1024)
                 
                 if data:
-                    
+                    print("DEBUG =========== " + data.decode("utf-8"))
+
                     print("DEBUG " + self.STATE)
                     # print("DEBUG-" + data.decode("utf-8"))
 

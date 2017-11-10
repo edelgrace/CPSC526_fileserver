@@ -271,9 +271,6 @@ class Server:
 
                     self.send_msg(content, client)
 
-                # change the state to close
-                self.send_msg("File download successful", client)
-
         # error occured
         except IOError as error:
             print("DEBUG error")
