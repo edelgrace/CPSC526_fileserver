@@ -190,7 +190,7 @@ class Client:
             return
         
         # write to stdout
-        sys.stdout.write(data)
+        # sys.stdout.write(data)
         # sys.stdout.flush()
 
         # write to a file
@@ -211,7 +211,7 @@ class Client:
 
         try:
             while True:
-                data = self.CLI_SOCKET.recv(1024)
+                data = self.CLI_SOCKET.recv(128)
                 
                 if data:
                     print("DEBUG =========== " + data.decode("utf-8"))

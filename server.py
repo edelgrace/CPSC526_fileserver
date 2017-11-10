@@ -264,8 +264,10 @@ class Server:
                     content = file.read(128)
 
                     if len(content) <= 128:
-                        contentSize = len(content)
-                        print("DEBUG reading size " + str(contentSize))
+                        padding = 128 - len(content)
+                        count = padding
+                        while count < 128:
+                            content += " "
 
                     print("DEBUG reading-" + str(content))
 
