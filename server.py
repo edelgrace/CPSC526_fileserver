@@ -259,11 +259,21 @@ class Server:
 
                 # read the file
                 while content != b'':
-                    content = file.read()
+                    # read 128 bits of the file
+                    content = file.read(128)
 
-                    sys.stdout.write(str(content))
+                    if len(content) <= 128:
+                        contentSize = len(content)
+                        print("DEBUG reading size " + str(contentSize))
+
+
+                    print("DEBUG reading-" + str(content))
 
                     self.send_msg(content, client)
+
+                # change the state to close
+                self.CLIENTS[client]['status'] = "CLOSE"
+                self.CLIENTS[client]['error'] = "File download successful"
 
         # error occured
         except IOError as error:

@@ -152,7 +152,7 @@ class Client:
 
         else:
             # close the connection
-            self.CLI_SOCKET.close()
+            # self.CLI_SOCKET.close()
 
             # TODO print message
 
@@ -168,8 +168,30 @@ class Client:
         # send the message
         self.CLI_SOCKET.send(bytearray(msg, "utf-8"))
 
+        # change the state appropriately
+        if self.OPERATION == "read":
+            self.STATE = "RECEIVING"
+        else:
+            self.STATE = "SENDING"
+
         return
 
+    def receiving(self, data):
+        """ Receive data from the server """
+        
+        # parse data
+        data = data.decode("utf-8")
+
+        # write to stdout
+        sys.stdout.write(data)
+
+        # write to a file
+        # reference: https://pages.cpsc.ucalgary.ca/~henrique.pereira/pdfs/read.py
+        with open(self.FILENAME, 'wb') as file:
+            content = None
+
+            while content != b'' or content != None:
+                file.write(content)
 
     def run(self):
         """ Run the client """
@@ -181,7 +203,7 @@ class Client:
                 if data:
                     
                     print("DEBUG " + self.STATE)
-                    print("DEBUG-" + data.decode("utf-8"))
+                    # print("DEBUG-" + data.decode("utf-8"))
 
                     # check if handshake done
                     if self.STATE == "CHALLENGE":
@@ -193,18 +215,35 @@ class Client:
                         print("DEBUG 2")
                         self.response(data)
 
+                    # check if authentication good
                     elif self.STATE == "AUTHENTICATE":
                         print("DEBUG 3")
                         self.authenticate(data)
 
+                    # check if request not sent yet
                     elif self.STATE == "REQUEST":
                         print("DEBUG 4")
                         self.send_request(data)
 
+                    # check if receiving data from server
+                    elif self.STATE == "RECEIVING":
+                        print("DEBUG 5 - receiving")
+                        self.receiving(data)
+
+                    # check if sending data to server
+                    elif self.STATE == "SENDING":
+                        print("DEBUG 5 - sending")
+                        self.sending(data)
+                    
+                    # error state
+                    else:
+                        # error state
+                        print("DEBUG 6 error")
+
                 # no more data, close connection
                 else:
                     print("Disconnected")
-                    self.CLI_SOCKET.close()
+                    sys.exit(0)
 
         except KeyboardInterrupt:
             print("Disconnected")
