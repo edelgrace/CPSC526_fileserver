@@ -342,6 +342,7 @@ class Server:
 
                     # data to be received
                     if data:
+                        print("DEBUG =========== " + data.decode("utf-8"))
                         # start handshake
                         if self.CLIENTS[sckt] == {}:
                             print(self.timestamp() + "Commencing handshake")
