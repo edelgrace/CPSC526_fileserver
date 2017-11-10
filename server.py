@@ -263,11 +263,12 @@ class Server:
                     # read 128 bits of the file
                     content = file.read(1024)
 
-                    if len(content) <= 128:
+                    if len(content) < 128:
                         padding = 128 - len(content)
                         count = padding
                         while count < 128:
                             content += b" "
+                            count += 1
 
                     print("DEBUG reading-" + str(content))
 
