@@ -285,7 +285,6 @@ class Server:
 
         print("DEBUG reading done")
 
-        print(self.MESSAGES[client])
         return
 
     def done(self, data, client):
@@ -402,6 +401,12 @@ class Server:
 
                 except queue.Empty:
                     self.OUTPUTS.remove(sckt)
+                    
+                    # close connection if error
+                    if self.CLIENTS[sckt]['status'] == "CLOSE":
+                        self.close_socket(sckt)
+                        print("DEBUG error")
+
 
                 else:
                     try:
@@ -411,12 +416,6 @@ class Server:
                         print("DEBUG send " + next_msg)
                     except Exception as e:
                         print(str(e))
-                    finally:
-                        # close connection if error
-                        if self.CLIENTS[sckt]['status'] == "CLOSE":
-                            self.close_socket(sckt)
-                            print("DEBUG error")
-
 
 def run():
     """ Run the server """
