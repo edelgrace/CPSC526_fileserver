@@ -135,6 +135,16 @@ class Client:
 
         self.STATE = "AUTHENTICATE"
 
+    def authenticate(self, data):
+        """ TODO """
+
+        # receive data from the server
+        response = data.decode("utf-8").strip()
+        print("DEBUG authenticate " + response)
+
+        if "OK" in response:
+            self.CLI_SOCKET.send(bytearray("OK", "utf-8"))
+
     def run(self):
         """ Run the client """
 
@@ -154,6 +164,9 @@ class Client:
                     # check if challenge send
                     elif self.STATE == "RESPONSE":
                         self.response(data)
+
+                    elif self.STATE == "AUTHENTICATE":
+                        self.authenticate(data)
 
                 # no more data, close connection
                 else:
