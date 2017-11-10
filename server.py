@@ -409,10 +409,9 @@ class Server:
                 except queue.Empty:
                     self.OUTPUTS.remove(sckt)
                     
-                    # close connection if error
+                    # close connection
                     if self.CLIENTS[sckt]['status'] == "CLOSE":
                         self.close_socket(sckt)
-                        print("DEBUG error")
 
 
                 else:

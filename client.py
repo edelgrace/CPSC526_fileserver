@@ -26,6 +26,7 @@ class Client:
     STATE = "HANDSHAKE"
     CHALLENGE = None
     RESPONSE = None
+    FIRSTBLOCK = 0
 
     def parse(self):
         """ Parse the arguments """
@@ -178,9 +179,9 @@ class Client:
 
     def receiving(self, data):
         """ Receive data from the server """
-        data = data.decode("utf-8").strip()
-
-        if data == "END":
+        data = data.decode("utf-8")
+        
+        if data.strip() == "END":
             self.CLI_SOCKET.send(bytearray("END", "utf-8"))
             
             print("DEBUG download successful?")
@@ -192,6 +193,13 @@ class Client:
         # write to stdout
         # sys.stdout.write(data)
         # sys.stdout.flush()
+
+        # check if file operation done yet
+        if self.FIRSTBLOCK = 0:
+            if os.path.exists(self.FILENAME):
+                file = open(self.FILENAME, 'w')
+                file.close()
+            self.FIRSTBLOCK = 1
 
         # write to a file
         # reference: https://pages.cpsc.ucalgary.ca/~henrique.pereira/pdfs/read.py
@@ -214,7 +222,6 @@ class Client:
                 data = self.CLI_SOCKET.recv(128)
                 
                 if data:
-                    print("DEBUG =========== " + data.decode("utf-8"))
 
                     print("DEBUG " + self.STATE)
                     # print("DEBUG-" + data.decode("utf-8"))
