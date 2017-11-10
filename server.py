@@ -101,7 +101,7 @@ class Server:
 
     def handshake(self, data, client):
         """ Guides through the initial steps of the protocol """
-        print("DEBUG handshake started")
+        print("DEBUG handshake")
         # receive nonce and cipher from client
         data = data.decode("utf-8")
         data = data.split(" ")
@@ -190,7 +190,7 @@ class Server:
         # challenge correct
         if str(challenge) == str(response):
             self.CLIENTS[client]['status'] = "SVR-RESPONSE"
-            self.send_msg("OK Challenge correct\n", client)
+            self.send_msg("OK client challenge correct\n", client)
             print(self.timestamp() + " Client knows the secret key")
 
         # challenge not done correctly
@@ -210,7 +210,7 @@ class Server:
         # the key was computed correctly
         if data == "OK":
             self.CLIENTS[client]['status'] = "FREE"
-            self.send_msg("OK Challenge correct\n", client)
+            self.send_msg("OK server challenge correct\n", client)
             print(self.timestamp() + "Server knows the server key")
         
         # the key was not computer correctly
@@ -249,7 +249,7 @@ class Server:
     def read_file(self, client, filename):
         """ Read a file from server """
         print("DEBUG reading")
-        print("DEBUG " + filename)
+        print("DEBUG reading" + filename)
 
         # open the file
         # reference: https://pages.cpsc.ucalgary.ca/~henrique.pereira/pdfs/read.py
@@ -273,7 +273,7 @@ class Server:
 
             self.CLIENTS[client]['status'] = "CLOSE"
 
-        print("DEBUG done reading")
+        print("DEBUG reading done")
         return
 
 
@@ -313,7 +313,8 @@ class Server:
                 else:
                     data = sckt.recv(1024)
                     print("DEBUG data")
-                    print("DEBUG " + str(self.CLIENTS[sckt]))
+                    print("DEBUG data " + str(self.CLIENTS[sckt]))
+                    print("DEBUG data-" + data.decode("utf-8"))
 
                     # data to be received
                     if data:
@@ -331,28 +332,29 @@ class Server:
                                 self.close_socket(sckt)
 
                             elif self.CLIENTS[sckt]['status'] == "CHALLENGED":
-                                print("DEBUG challenged")
+                                print("DEBUG 1 challenged")
                                 self.challenged(data, sckt)
-                                print("DEBUG finish challenge")
+                                print("DEBUG challenge finished")
 
                             elif self.CLIENTS[sckt]['status'] == "CLI-RESPONSE":
-                                print("DEBUG response")
+                                print("DEBUG 2 response")
                                 self.cliResponse(data, sckt)
-                                print("DEBUG finish response")
+                                print("DEBUG response finished")
                                 
                             elif self.CLIENTS[sckt]['status'] == "SVR-RESPONSE":
-                                print("DEBUG server response")
+                                print("DEBUG 3 server response")
                                 self.svr_response(data, sckt)
+                                print("DEBUG server response finished")
 
                             # client can freely communicate
                             else:
-                                print("DEBUG free")
+                                print("DEBUG 4 request")
                                 # put data in the queue
                                 # self.send_msg(data, sckt)
 
                                 self.operation_request(data, sckt)
 
-                                print("DEBUG done free")
+                                print("DEBUG request finished")
 
                     # no more data = close connection
                     else: 

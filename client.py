@@ -119,6 +119,7 @@ class Client:
         # change the state
         self.STATE = "RESPONSE"
 
+
     def response(self, data):
         """ Receive data from the server """
 
@@ -135,6 +136,7 @@ class Client:
 
         self.STATE = "AUTHENTICATE"
 
+
     def authenticate(self, data):
         """ TODO """
 
@@ -142,8 +144,32 @@ class Client:
         response = data.decode("utf-8").strip()
         print("DEBUG authenticate " + response)
 
+        # TODO comment
         if "OK" in response:
             self.CLI_SOCKET.send(bytearray("OK", "utf-8"))
+
+            self.STATE = "REQUEST"
+
+        else:
+            # close the connection
+            self.CLI_SOCKET.close()
+
+            # TODO print message
+
+            sys.exit(0)
+
+
+    def send_request(self, data):
+        """ Send file request to the server """
+
+        # construct the message
+        msg = self.OPERATION + " " + self.FILENAME
+
+        # send the message
+        self.CLI_SOCKET.send(bytearray(msg, "utf-8"))
+
+        return
+
 
     def run(self):
         """ Run the client """
@@ -155,18 +181,25 @@ class Client:
                 if data:
                     
                     print("DEBUG " + self.STATE)
-                    print(data)
+                    print("DEBUG-" + data.decode("utf-8"))
 
                     # check if handshake done
                     if self.STATE == "CHALLENGE":
+                        print("DEBUG 1")
                         self.challenge(data)
 
                     # check if challenge send
                     elif self.STATE == "RESPONSE":
+                        print("DEBUG 2")
                         self.response(data)
 
                     elif self.STATE == "AUTHENTICATE":
+                        print("DEBUG 3")
                         self.authenticate(data)
+
+                    elif self.STATE == "REQUEST":
+                        print("DEBUG 4")
+                        self.send_request(data)
 
                 # no more data, close connection
                 else:
