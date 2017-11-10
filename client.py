@@ -178,8 +178,14 @@ class Client:
 
     def receiving(self, data):
         """ Receive data from the server """
-        data = data.decode("utf-8")
+        data = data.decode("utf-8").strip()
 
+        if data == "File download successful":
+            self.CLI_SOCKET.send(bytearray("END", "utf-8"))
+            
+            print("DEBUG download successful?")
+            
+            return
         # write to stdout
         sys.stdout.write(data)
         # sys.stdout.flush()
@@ -192,8 +198,6 @@ class Client:
             # file.flush()
 
             file.close()
-
-        self.CLI_SOCKET.send(bytearray("OK","utf-8"))
 
         return
 
@@ -273,5 +277,3 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         print("Disconnected")
         sys.exit(0)
-    # except Exception as e:
-    #     print(str(e))

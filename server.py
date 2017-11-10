@@ -251,6 +251,7 @@ class Server:
         print("DEBUG reading")
         print("DEBUG reading" + filename)
 
+
         # open the file
         # reference: https://pages.cpsc.ucalgary.ca/~henrique.pereira/pdfs/read.py
         try:
@@ -272,8 +273,8 @@ class Server:
                     self.send_msg(content, client)
 
                 # change the state to close
-                # self.CLIENTS[client]['status'] = "CLOSE"
-                # self.CLIENTS[client]['error'] = "File download successful"
+                self.CLIENTS[client]['status'] = "DONE"
+                self.send_msg("File download successful", client)
 
         # error occured
         except IOError as error:
@@ -287,6 +288,16 @@ class Server:
         print("DEBUG reading done")
         return
 
+    def done(self, data, client):
+        """ Check if done """
+
+        # receive from client
+        data = data.decode("utf-8").strip()
+
+        # close the connection
+        if data == "END":
+            self.send_msg("END", "utf-8")
+            self.CLIENTS[client]['status'] = "CLOSE"
 
     def run(self):
 
@@ -358,14 +369,19 @@ class Server:
                                 print("DEBUG server response finished")
 
                             # client can freely communicate
-                            else:
+                            elif self.CLIENTS[sckt]['status'] == "FREE":
                                 print("DEBUG 4 request")
                                 # put data in the queue
                                 # self.send_msg(data, sckt)
 
                                 self.operation_request(data, sckt)
 
-                                print("DEBUG request finished")
+                                print("DEBUG request done")
+
+                            elif self.CLIENTS[sckt]['status'] == "DONE":
+                                print("DEBUG done")
+                                
+                                self.done(data, sckt)
 
                     # no more data = close connection
                     else: 
@@ -386,6 +402,8 @@ class Server:
                     try:
                         # send the message
                         sckt.send(next_msg)
+
+                        print("DEBUG send " + next_msg.encode("utf-8"))
                     except Exception as e:
                         print(str(e))
                     finally:
