@@ -412,7 +412,6 @@ class Server:
                     # send the message
                     sckt.send(next_msg)
 
-                    print("DEBUG send " + next_msg)
 
 def run():
     """ Run the server """
