@@ -272,7 +272,7 @@ class Server:
                     self.send_msg(content, client)
 
                 self.STATE = "DONE"
-                sekf.send_msg("END", client)
+                self.send_msg("END", client)
 
         # error occured
         except IOError as error:
