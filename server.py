@@ -297,7 +297,7 @@ class Server:
         # close the connection
         if data == "END":
             print("DEBUG client sent end")
-            self.send_msg("END", "utf-8")
+            self.send_msg("END", client)
             self.CLIENTS[client]['status'] = "CLOSE"
 
         return
