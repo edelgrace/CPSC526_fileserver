@@ -97,14 +97,24 @@ class Client:
 
         self.CHALLENGE = data[1]
 
+        print("DEBUG received challenge " + self.CHALLENGE)
+
         # generate message to send to server
         challenge = uuid.uuid4().hex
         msg = "You have been challenged: " + challenge
+
+        print("DEBUG sent challenge " + challenge)
+
         self.CLI_SOCKET.send(bytearray(msg, "utf-8"))
 
         # generate the response the server should reply with
-        response = challenge + self.SECRET_KEY
+        response = self.CHALLENGE + self.SECRET_KEY
+
+        print("DEBUG prehash response " + response)
+
         self.RESPONSE = hashlib.sha224(response.encode("utf-8")).hexdigest()
+
+        print("DEBUG sent response " + self.RESPONSE)
 
         # change the state
         self.STATE = "RESPONSE"
@@ -117,46 +127,42 @@ class Client:
         data = data.split(": ")
         response = data[1]
 
-        # check if the response is correct
-        if response == self.RESPONSE:
+        print("DEBUG received response " + response)
 
-            # send response
-            msg = "OK"
-            self.CLI_SOCKET.send(bytearray(msg, "utf-8"))
+        # send response
+        msg = "My response: " + self.RESPONSE
+        self.CLI_SOCKET.send(bytearray(msg, "utf-8"))
 
-        else:
-            # send an error
-            msg = "ERROR: Wrong"
-
-            self.CLI_SOCKET.send(bytearray(msg, "utf-8"))
-        
+        self.STATE = "AUTHENTICATE"
 
     def run(self):
         """ Run the client """
 
-        while True:
-            data = self.CLI_SOCKET.recv(1024)
-            
-            if data:
+        try:
+            while True:
+                data = self.CLI_SOCKET.recv(1024)
                 
-                print("DEBUG " + self.STATE)
-                print(data)
+                if data:
+                    
+                    print("DEBUG " + self.STATE)
+                    print(data)
 
-                # check if handshake done
-                if self.STATE == "CHALLENGE":
-                    self.challenge(data)
+                    # check if handshake done
+                    if self.STATE == "CHALLENGE":
+                        self.challenge(data)
 
-                # check if challenge send
-                elif self.STATE == "RESPONSE":
-                    self.response(data)
+                    # check if challenge send
+                    elif self.STATE == "RESPONSE":
+                        self.response(data)
 
-            # no more data, close connection
-            else:
-                print("Disconnected")
-                self.CLI_SOCKET.close()
+                # no more data, close connection
+                else:
+                    print("Disconnected")
+                    self.CLI_SOCKET.close()
 
-            return
-
+        except KeyboardInterrupt:
+            print("Disconnected")
+            sys.exit(0)
 
 def run():
     """ Run the client """

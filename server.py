@@ -149,13 +149,17 @@ class Server:
         """ Receive challenge and compute response """
 
         # receive the challenge
-        data = data.decode("utf-8")
+        data = data.decode("utf-8").strip()
         data = data.split(": ")
         
         challenge = data[1] + self.SECRET_KEY
         
+        print("DEBUG pre hash received challenge " + challenge)
+
         # compute the response to the challenge
         my_response = hashlib.sha224(challenge.encode("utf-8")).hexdigest()
+
+        print("DEBU hash received challenge " + my_response)
 
         # put message on queue
         my_response = "Server response: " + my_response + "\n"
@@ -168,7 +172,7 @@ class Server:
 
     def cliResponse(self, data, client):
         # get response from client
-        data = data.decode("utf-8")
+        data = data.decode("utf-8").strip()
         data = data.split(": ")
         response = data[1].strip()
 
