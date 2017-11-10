@@ -273,7 +273,6 @@ class Server:
                     self.send_msg(content, client)
 
                 # change the state to close
-                self.CLIENTS[client]['status'] = "DONE"
                 self.send_msg("File download successful", client)
 
         # error occured
@@ -378,6 +377,8 @@ class Server:
                                 # self.send_msg(data, sckt)
 
                                 self.operation_request(data, sckt)
+
+                                self.CLIENTS[sckt]['status'] = "DONE"
 
                                 print("DEBUG request done")
 

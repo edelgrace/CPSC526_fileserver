@@ -185,6 +185,8 @@ class Client:
             
             print("DEBUG download successful?")
             
+            self.STATE = "DONE"
+
             return
         # write to stdout
         sys.stdout.write(data)
@@ -192,7 +194,7 @@ class Client:
 
         # write to a file
         # reference: https://pages.cpsc.ucalgary.ca/~henrique.pereira/pdfs/read.py
-        with open(self.FILENAME, 'wb') as file:
+        with open(self.FILENAME, 'ab') as file:
             file.write(bytearray(data,"utf-8"))
 
             # file.flush()
