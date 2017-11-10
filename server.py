@@ -409,13 +409,10 @@ class Server:
 
 
                 else:
-                    try:
-                        # send the message
-                        sckt.send(next_msg)
+                    # send the message
+                    sckt.send(next_msg)
 
-                        print("DEBUG send " + next_msg)
-                    except Exception as e:
-                        print(str(e))
+                    print("DEBUG send " + next_msg)
 
 def run():
     """ Run the server """
