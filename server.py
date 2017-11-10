@@ -270,7 +270,9 @@ class Server:
                     print("DEBUG reading-" + str(content))
 
                     self.send_msg(content, client)
+
                 self.STATE = "DONE"
+
         # error occured
         except IOError as error:
             print("DEBUG error")
@@ -291,10 +293,8 @@ class Server:
         data = data.decode("utf-8").strip()
 
         # close the connection
-        if data == "END":
-            print("DEBUG client sent end")
-            self.send_msg("END", client)
-            self.CLIENTS[client]['status'] = "CLOSE"
+        self.send_msg("END", client)
+        self.CLIENTS[client]['status'] = "CLOSE"
 
         return
 
