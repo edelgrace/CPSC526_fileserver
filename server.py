@@ -52,16 +52,16 @@ class Server:
         timestamp = timestamp.strftime("%H:%M:%S")
 
         # return timestamp
-        return(timestamp + " - ")
+        return timestamp + " - "
 
-    def sendMsg(self, data, sckt):
+
+    def send_msg(self, data, sckt):
         """ Function to send message to a socket """
         if isinstance(data, (bytes, bytearray)):
             data = data.decode("utf-8")
-            
+
         # TODO Check which cipher is used
-        
-            
+
         # put message on queue
         self.MESSAGES[sckt].put(bytearray(data,"utf-8"))
 
@@ -83,7 +83,7 @@ class Server:
         return
 
 
-    def closeSocket(self, sckt):
+    def close_socket(self, sckt):
         """ Close a connection to a client """
 
         # Log connection closing
@@ -113,7 +113,7 @@ class Server:
             error = "Error: Cipher and nonce not sent"
             
             # put error on queue
-            self.sendMsg(error, client)
+            self.send_msg(error, client)
 
             print("DEBUG handshake error")
 
@@ -121,6 +121,9 @@ class Server:
 
         cipher = data[0]
         nonce = data[1]
+        client_addr = client.getsockname()[0]
+
+        print(self.timestamp() + "New connection from " + client_addr + ", cipher: " + cipher + ", nonce: " + nonce)
 
         # TODO generate IVs and session-keys from nonce and cipher
         self.CLIENTS[client]['IV'] = None
@@ -135,7 +138,7 @@ class Server:
         # put challenge onto the clients queue
         challenge = "You have been challenged: " + challenge + "\n"
 
-        self.sendMsg(challenge, client)
+        self.send_msg(challenge, client)
 
         # change client status
         self.CLIENTS[client]['status'] = "CHALLENGED"
@@ -156,7 +159,7 @@ class Server:
 
         # put message on queue
         my_response = "Server response: " + my_response + "\n"
-        self.sendMsg(my_response, client)
+        self.send_msg(my_response, client)
 
         # change state to response
         self.CLIENTS[client]['status'] = "CLI-RESPONSE"
@@ -167,7 +170,7 @@ class Server:
         # get response from client
         data = data.decode("utf-8")
         data = data.split(": ")
-        response = data[1].strip("\n")
+        response = data[1].strip()
 
         # compute the client challenge
         challenge = self.CLIENTS[client]['challenge'] + self.SECRET_KEY
@@ -176,70 +179,102 @@ class Server:
         
         challenge = hashlib.sha224(challenge.encode("utf-8")).hexdigest()
 
-        print("DEBUG computed " + challenge)
-        print("DEBUG response " + response)
+        print("DEBUG computed-" + challenge + "-")
+        print("DEBUG response-" + response + "-")
+        print(challenge==response)
 
         # challenge correct
-        if challenge == response:
+        if str(challenge) == str(response):
             self.CLIENTS[client]['status'] = "SVR-RESPONSE"
-            self.sendMsg("OK Challenge correct\n", client)
+            self.send_msg("OK Challenge correct\n", client)
             print(self.timestamp() + " Client knows the secret key")
 
         # challenge not done correctly
         else:
             self.CLIENTS[client]['status'] = "CLOSE"
-            self.sendMsg("Error: The response to the challenge was wrong\n", client)
+            self.send_msg("Error: The response to the challenge was wrong\n", client)
 
         return
-        
-    def svrResponse(self, data, client):
+
+    def svr_response(self, data, client):
         """ Check if the server had a correct response """
-        
+
         # get the client response
         data = data.decode("utf-8")
         data = data.strip("\n")
-        
+
         # the key was computed correctly
         if data == "OK":
             self.CLIENTS[client]['status'] = "FREE"
-            self.sendMsg("OK Challenge correct\n", client)
+            self.send_msg("OK Challenge correct\n", client)
             print(self.timestamp() + "Server knows the server key")
         
         # the key was not computer correctly
         else:
             self.CLIENTS[client]['status'] = "CLOSE"
-            self.sendMsg("ERROR Server did not compute challenge correctly")
+            self.send_msg("ERROR Server did not compute challenge correctly", client)
             print(self.timestamp() + "Server does not know the server key?")
 
 
-    def operationRequest(self, data, client):
+    def operation_request(self, data, client):
         """ Handle the client request """
         
         # get the request
-        data = data.decode("utf-8").strip("\n")
+        data = data.decode("utf-8").strip()
         data = data.split(" ")
         
         operation = data[0]
         filename = data[1]
-        
+
         # operation is to write a file
         if operation == "write":
-            self.writeFile(client, filename)
-            
+            self.write_file(client, filename)
+
+
         # operation is to read a file
         else:
-            self.readFile(client, filename)
-            
-    def writeFile(self, client, filename):
+            self.read_file(client, filename)
+
+    def write_file(self, client, filename):
         """ Write a file to server """
+
+
+
         return
-            
-    def readFile(self, client, filename):
+
+    def read_file(self, client, filename):
         """ Read a file from server """
+        print("DEBUG reading")
+        print("DEBUG " + filename)
+
+        # open the file
+        # reference: https://pages.cpsc.ucalgary.ca/~henrique.pereira/pdfs/read.py
+        try:
+            with open(filename, 'rb') as file:
+                content = None
+
+                # read the file
+                while content != b'':
+                    content = file.read()
+
+                    sys.stdout.write(str(content))
+
+                    self.send_msg(content, client)
+
+        # error occured
+        except IOError as error:
+            error = str(error) + "\n"
+
+            self.send_msg(error, client)
+
+            self.CLIENTS[client]['status'] = "CLOSE"
+
+        print("DEBUG done reading")
         return
-            
+
+
     def run(self):
-        
+
         """ Run the server """
 
         # Logging messages
@@ -267,7 +302,7 @@ class Server:
                     self.MESSAGES[connection] = queue.Queue()
                     self.CLIENTS[connection] = {}
 
-                    # Log the ip of client
+                    # og the ip of client
                     print(self.timestamp() + "New connection from: " + client_addr[0])
 
                 # client
@@ -289,7 +324,7 @@ class Server:
                             # close connection if error
                             if self.CLIENTS[sckt]['status'] == "CLOSE":
                                 print("DEBUG error")
-                                self.closeSocket(sckt)
+                                self.close_socket(sckt)
 
                             elif self.CLIENTS[sckt]['status'] == "CHALLENGED":
                                 print("DEBUG challenged")
@@ -303,21 +338,23 @@ class Server:
                                 
                             elif self.CLIENTS[sckt]['status'] == "SVR-RESPONSE":
                                 print("DEBUG server response")
-                                self.svrResponse(data, sckt)
+                                self.svr_response(data, sckt)
 
                             # client can freely communicate
                             else:
                                 print("DEBUG free")
                                 # put data in the queue
-                                self.sendMsg(data, sckt)
+                                # self.send_msg(data, sckt)
+
+                                self.operation_request(data, sckt)
+
+                                print("DEBUG done free")
 
                     # no more data = close connection
                     else: 
                         print("DEBUG close")
-                        self.closeSocket(sckt)
+                        self.close_socket(sckt)
         
-                pass
-
             # go through outputs
             for sckt in writable:
                 print("DEBUG input" + sckt.getsockname()[0])
@@ -337,7 +374,7 @@ class Server:
                     finally:
                         # close connection if error
                         if self.CLIENTS[sckt]['status'] == "CLOSE":
-                            self.closeSocket(sckt)
+                            self.close_socket(sckt)
                             print("DEBUG error")
 
 
