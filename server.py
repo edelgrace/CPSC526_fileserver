@@ -267,7 +267,6 @@ class Server:
                         contentSize = len(content)
                         print("DEBUG reading size " + str(contentSize))
 
-
                     print("DEBUG reading-" + str(content))
 
                     self.send_msg(content, client)
@@ -285,6 +284,8 @@ class Server:
             self.CLIENTS[client]['status'] = "CLOSE"
 
         print("DEBUG reading done")
+
+        print(self.MESSAGES[client])
         return
 
     def done(self, data, client):
