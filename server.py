@@ -412,6 +412,7 @@ class Server:
                     # send the message
                     sckt.send(next_msg)
 
+                    print("DEBUG send " + next_msg.encode("utf-8"))
 
 def run():
     """ Run the server """
