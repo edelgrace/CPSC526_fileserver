@@ -263,14 +263,14 @@ class Server:
                     # read 128 bits of the file
                     content = file.read(128)
 
-                    if len(content) < 128:
-                        content = content.decode("utf-8")
-                        padding = 128 - len(content)
-                        print("DEBUG dljfskf " + str(padding))
-                        count = padding
-                        while count < 128:
-                            content += str(padding)
-                            count += 1
+                    # if len(content) < 128:
+                        # content = content.decode("utf-8")
+                        # padding = 128 - len(content)
+                        # print("DEBUG dljfskf " + str(padding))
+                        # count = padding
+                        # while count < 128:
+                        #     content += str(padding)
+                        #     count += 1
 
                     print("DEBUG reading-" + str(content))
 
