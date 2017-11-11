@@ -206,7 +206,11 @@ class Client:
                 data = data[:index]
 
         if lastChar == "-":
+            lastChar = data[-3:-1]
             print(lastChar)
+            if lastChar.isdigit():
+                lastChar = int(lastChar)
+                data = data[:0-lastChar]
 
         # write to stdout
         sys.stdout.write(data)
@@ -241,7 +245,6 @@ class Client:
                 
                 if data:
 
-                    print("DEBUG " + self.STATE)
                     # print("DEBUG-" + data.decode("utf-8"))
 
                     # check if handshake done
