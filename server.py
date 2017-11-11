@@ -264,10 +264,11 @@ class Server:
                     content = file.read(128)
 
                     if len(content) < 128:
+                        content = content.decode("utf-8")
                         padding = 128 - len(content)
                         count = padding
                         while count < 128:
-                            content += bytes(padding)
+                            content += str(padding)
                             count += 1
 
                     print("DEBUG reading-" + str(content))
