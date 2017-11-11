@@ -261,7 +261,7 @@ class Server:
                 # read the file
                 while content != b'':
                     # read 128 bits of the file
-                    content = file.read(1024)
+                    content = file.read(128)
 
                     if len(content) < 128:
                         content = content.decode("utf-8")
