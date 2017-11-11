@@ -267,6 +267,7 @@ class Server:
                         padding = 128 - len(content)
                         content = content.decode("utf-8")
 
+                        print("DEBUG " + str(padding))
                         if padding < 10:
                             content += str(padding) * padding
                         else:
