@@ -180,6 +180,10 @@ class Client:
     def receiving(self, data):
         """ Receive data from the server """
         data = data.decode("utf-8")
+
+        lastChar = data[-1]
+
+        print(lastChar)
         
         if data.strip() == "END":
             self.CLI_SOCKET.send(bytearray("END", "utf-8"))
@@ -190,12 +194,24 @@ class Client:
 
             return
         
+        if lastChar.isdigit():
+            index = -1
+            while index * -1 < lastChar:
+                if data[index] == lastChar:
+                    index -= 1
+
+            print(index)
+            if index * -1 == lastChar:
+                data = data[:index]
+
+
+
         # write to stdout
-        # sys.stdout.write(data)
+        sys.stdout.write(data)
         # sys.stdout.flush()
 
         # check if file operation done yet
-        if self.FIRSTBLOCK = 0:
+        if self.FIRSTBLOCK == 0:
             if os.path.exists(self.FILENAME):
                 file = open(self.FILENAME, 'w')
                 file.close()
