@@ -196,6 +196,7 @@ class Client:
         
         if lastChar.isdigit():
             index = -1
+            lastChar = int(lastChar)
             while index * -1 < lastChar:
                 if data[index] == lastChar:
                     index -= 1
@@ -204,7 +205,8 @@ class Client:
             if index * -1 == lastChar:
                 data = data[:index]
 
-
+        if lastChar == "-":
+            print(lastChar)
 
         # write to stdout
         sys.stdout.write(data)
@@ -264,7 +266,7 @@ class Client:
 
                     # check if receiving data from server
                     elif self.STATE == "RECEIVING":
-                        print("DEBUG 5 - receiving")
+                        print("\nDEBUG 5 - receiving")
                         self.receiving(data)
 
                     # check if sending data to server

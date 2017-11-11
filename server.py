@@ -266,7 +266,15 @@ class Server:
                     if len(content) < 128 and len(content) != 0:
                         padding = 128 - len(content)
                         content = content.decode("utf-8")
-                        content += str(padding) * padding
+
+                        if padding < 10:
+                            content += str(padding) * padding
+                        else:
+                            if padding % 2 == 0:
+                                content += str(padding) * padding/2
+                            else:
+                                content += str(padding) * ((padding/2)-1)
+                                content += "-"
 
                     print("DEBUG reading-" + str(content))
 
