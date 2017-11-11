@@ -273,7 +273,7 @@ class Server:
                             if padding % 2 == 0:
                                 content += str(padding) * padding/2
                             else:
-                                content += str(padding) * (padding-1)/2
+                                content += str(padding) * ((padding-1)/2)
                                 content += "-"
 
                     print("DEBUG reading-" + str(content))
