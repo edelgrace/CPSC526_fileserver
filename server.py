@@ -267,7 +267,7 @@ class Server:
                         padding = 128 - len(content)
                         count = padding
                         while count < 128:
-                            content += padding
+                            content += bytearray(padding,"utf-8")
                             count += 1
 
                     print("DEBUG reading-" + str(content))
