@@ -244,7 +244,6 @@ class Client:
                 data = self.CLI_SOCKET.recv(128)
                 
                 if data:
-                    sys.stderr.write(data)
                     # check if handshake done
                     if self.STATE == "CHALLENGE":
                         self.challenge(data)
