@@ -12,6 +12,7 @@ import uuid
 import hashlib
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives import padding
 
 class Server:
     """ Server Class """
@@ -57,13 +58,36 @@ class Server:
 
     def send_msg(self, data, sckt):
         """ Function to send message to a socket """
-        if isinstance(data, (bytes, bytearray)):
-            self.MESSAGES[sckt].put(data)
-        else:
-        # TODO Check which cipher is used
 
-            # put message on queue
-            self.MESSAGES[sckt].put(bytearray(data,"utf-8"))
+        if self.CLIENTS[sckt]['cipher'] != "null":
+            backend = default_backend()
+
+            # generate the IV
+            iv = self.SECRET_KEY + self.CLIENTS[sckt]['nonce'] + "IV"
+            iv = hashlib.sha256(iv).hexdigest()
+
+            # generate the session-key
+            key = self.SECRET_KEY + self.CLIENTS[sckt]['nonce'] + "SK"
+            key = hashlib.sha256(key).hexdigest()
+
+            # encrypt
+            cipher = Cipher(algorithms.AES(key), modes.CBC(iv), backend=backend)
+            encryptor = cipher.encryptor()
+            padder = padding.PKCS7(128).padder()
+
+            if isinstance(data, (bytes, bytearray)):
+                padded = padder.update(bytearray(data,"utf-8")) + padder.finalize()
+            
+            else:
+                padded = padder.update(data) + padder.finalize()
+
+            ct = encryptor.update(padded) + encryptor.finalize()
+
+        else:
+            if isinstance(data, (bytes, bytearray)):
+                self.MESSAGES[sckt].put(data)
+            else:
+                self.MESSAGES[sckt].put(bytearray(data, "utf-8"))
 
         # add to the outputs
         if sckt not in self.OUTPUTS:
@@ -422,8 +446,6 @@ class Server:
                 else:
                     # send the message
                     sckt.send(next_msg)
-
-                    print("DEBUG send " + str(next_msg))
 
 
 def run():
