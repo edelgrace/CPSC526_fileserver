@@ -58,12 +58,12 @@ class Server:
     def send_msg(self, data, sckt):
         """ Function to send message to a socket """
         if isinstance(data, (bytes, bytearray)):
-            data = data.decode("utf-8")
-
+            self.MESSAGES[sckt].put(data)
+        else:
         # TODO Check which cipher is used
 
-        # put message on queue
-        self.MESSAGES[sckt].put(bytearray(data,"utf-8"))
+            # put message on queue
+            self.MESSAGES[sckt].put(bytearray(data,"utf-8"))
 
         # add to the outputs
         if sckt not in self.OUTPUTS:
