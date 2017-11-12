@@ -179,13 +179,14 @@ class Client:
 
     def receiving(self, data):
         """ Receive data from the server """
-        data = data.decode("utf-8")
 
         lastChar = data[-1]
 
-        print(lastChar)
+        content = unicode(data, errors='ignore').strip()
+
+        print("DEBUG lastchar" + lastChar)
         
-        if data.strip() == "END":
+        if content == "END":
             self.CLI_SOCKET.send(bytearray("END", "utf-8"))
             
             print("DEBUG download successful?")
@@ -197,11 +198,12 @@ class Client:
         if lastChar.isdigit():
             index = -1
             lastChar = int(lastChar)
-            while index * -1 < lastChar:
-                if data[index] == lastChar:
+            while index != lastChar:
+                if data[0-index] == lastChar:
                     index -= 1
-
-            print(index)
+                else:
+                    break
+                
             if index * -1 == lastChar:
                 data = data[:index]
 
@@ -213,7 +215,7 @@ class Client:
                 data = data[:0-lastChar]
 
         # write to stdout
-        sys.stdout.write(data)
+        # sys.stdout.write(data)
         # sys.stdout.flush()
 
         # check if file operation done yet
@@ -226,7 +228,7 @@ class Client:
         # write to a file
         # reference: https://pages.cpsc.ucalgary.ca/~henrique.pereira/pdfs/read.py
         with open(self.FILENAME, 'ab') as file:
-            file.write(bytearray(data,"utf-8"))
+            file.write(data)
 
             # file.flush()
 
@@ -245,7 +247,7 @@ class Client:
                 
                 if data:
 
-                    # print("DEBUG-" + data.decode("utf-8"))
+                    print("DEBUG-" + data)
 
                     # check if handshake done
                     if self.STATE == "CHALLENGE":
@@ -269,7 +271,6 @@ class Client:
 
                     # check if receiving data from server
                     elif self.STATE == "RECEIVING":
-                        print("\nDEBUG 5 - receiving")
                         self.receiving(data)
 
                     # check if sending data to server

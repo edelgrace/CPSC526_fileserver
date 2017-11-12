@@ -324,7 +324,7 @@ class Server:
 
             # go through inputs
             for sckt in readable:
-                print("DEBUG input" + sckt.getsockname()[0])
+
                 # server
                 if sckt is self.SVR_SOCKET:
                     # accept a connection
