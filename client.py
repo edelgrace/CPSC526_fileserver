@@ -4,7 +4,7 @@ import select
 import socket
 import os
 import sys
-import queue
+import Queue
 import argparse
 import time
 import datetime
