@@ -157,7 +157,7 @@ class Client:
             # self.CLI_SOCKET.close()
 
             # TODO print message
-
+            sys.stderr.write("ERROR: wrong key")
             sys.exit(0)
 
 
@@ -194,11 +194,8 @@ class Client:
         content = unicode(data, errors='ignore').strip()
 
         
-        
         if content == "END":
             self.CLI_SOCKET.send(bytearray("END", "utf-8"))
-            
-            
             
             self.STATE = "DONE"
 
@@ -247,7 +244,7 @@ class Client:
                 data = self.CLI_SOCKET.recv(128)
                 
                 if data:
-
+                    sys.stderr.write(data)
                     # check if handshake done
                     if self.STATE == "CHALLENGE":
                         self.challenge(data)
