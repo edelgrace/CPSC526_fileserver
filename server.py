@@ -335,7 +335,7 @@ class Server:
 
                     # add connection to the arrays
                     self.INPUTS.append(connection)
-                    self.MESSAGES[connection] = queue.Queue()
+                    self.MESSAGES[connection] = Queue.Queue()
                     self.CLIENTS[connection] = {}
 
                     # og the ip of client
@@ -413,7 +413,7 @@ class Server:
                     # grab the next message
                     next_msg = self.MESSAGES[sckt].get_nowait()
 
-                except queue.Empty:
+                except Queue.Empty:
                     self.OUTPUTS.remove(sckt)
                     
                     # close connection
