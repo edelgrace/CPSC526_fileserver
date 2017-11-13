@@ -12,6 +12,7 @@ import uuid
 import hashlib
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives import padding
 
 class Client:
     """ Class for the client """
@@ -121,7 +122,7 @@ class Client:
 
             # create the cipher
             backend = default_backend()
-            self.ENC_DEC = Cipher(algorithms.AES(self.KEY), modes.CBC(self.IV), backend=backend)
+            self.ENC_DEC = Cipher(algorithms.AES(self.SK), modes.CBC(self.IV), backend=backend)
 
         self.CLI_SOCKET.send(bytearray(msg, "utf-8"))
 

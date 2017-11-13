@@ -82,12 +82,12 @@ class Server:
                 padded = padder.update(data) + padder.finalize()
             
             else:
-                padded = padder.update(bytearray(data, "utf-8")) + padder.finalize()
+                padded = padder.update(bytes(data)) + padder.finalize()
 
             ct = encryptor.update(padded) + encryptor.finalize()
 
             self.MESSAGES[sckt].put(ct)
-            
+
         else:
             if isinstance(data, (bytes, bytearray)):
                 self.MESSAGES[sckt].put(data)
