@@ -82,7 +82,6 @@ class Server:
             # padding
             padder = padding.PKCS7(128).padder()
             data = padder.update(data) + padder.finalize()
-            print("DEBUG " + str(data))
 
             # encrypt
             data = encryptor.update(data) + encryptor.finalize()
@@ -355,7 +354,6 @@ class Server:
                                 content += str(padding) * int((padding-2)/3)
                                 content += "==="
                             
-                    print("DEBUG " + str(content))
                     if len(content) != 0:
                         self.send_msg(content, client)
 
@@ -481,7 +479,7 @@ class Server:
                 try:
                     # grab the next message
                     next_msg = self.MESSAGES[sckt].get_nowait()
-                    print(next_msg)
+                    print("DEBUG " + str(next_msg))
                 except Queue.Empty:
                     self.OUTPUTS.remove(sckt)
                     
