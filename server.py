@@ -92,6 +92,10 @@ class Server:
             cipher = Cipher(algorithms.AES(key), modes.CBC(iv), backend=backend)
             encryptor = cipher.encryptor()
 
+            # padding
+            padder = padding.PKCS7(128).padder()
+            data = padder.update(data) + padder.finalize()
+
             ct = encryptor.update(data) + encryptor.finalize()
 
             self.MESSAGES[sckt].put(ct)
