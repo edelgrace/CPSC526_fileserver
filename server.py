@@ -167,7 +167,7 @@ class Server:
             key = hashlib.sha256(key).hexdigest()
             
             # change key depeneding on what cipher chosen
-            if cipher_chosen == "aes128":
+            if cipher == "aes128":
                 key = key[:16]
             else:
                 key = key[:32]
