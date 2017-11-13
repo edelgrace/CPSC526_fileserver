@@ -76,15 +76,8 @@ class Server:
             # encrypt
             cipher = Cipher(algorithms.AES(key), modes.CBC(iv), backend=backend)
             encryptor = cipher.encryptor()
-            padder = padding.PKCS7(128).padder()
 
-            if isinstance(data, (bytes, bytearray)):
-                padded = padder.update(data) + padder.finalize()
-            
-            else:
-                padded = padder.update(bytes(data)) + padder.finalize()
-
-            ct = encryptor.update(padded) + encryptor.finalize()
+            ct = encryptor.update(data) + encryptor.finalize()
 
             self.MESSAGES[sckt].put(ct)
 
