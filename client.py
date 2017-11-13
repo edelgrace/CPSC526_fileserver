@@ -290,6 +290,22 @@ class Client:
                 data = data[:0-lastChar]
                 self.LASTBLOCK = True
 
+        elif lastChar == "*":
+            lastChar = data[-4:-1]
+
+            if lastChar.isdigit():
+                lastChar = int(lastChar)
+                data = data[:0-lastChar]
+                self.LASTBLOCK = True
+
+        elif lastChar == "=":
+            lastChar = data[-5:6]
+            
+            if lastChar.isdigit():
+                lastChar = int(lastChar)
+                data = data[:0-lastChar]
+                self.LASTBLOCK = True
+
         # write to stdout
         # reference: https://pages.cpsc.ucalgary.ca/~henrique.pereira/pdfs/read.py
         if notLastBlock:

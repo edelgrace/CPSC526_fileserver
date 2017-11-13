@@ -330,14 +330,29 @@ class Server:
                         padding = 128 - len(content)
                         content = content.decode("utf-8")
 
+                        # padding with one digit
                         if padding < 10:
                             content += str(padding) * padding
-                        else:
+                        
+                        # padding with two digits
+                        elif padding >= 10 < 100:
                             if padding % 2 == 0:
                                 content += str(padding) * padding/2
                             else:
                                 content += str(padding) * int((padding-1)/2)
                                 content += "-"
+
+                        # padding with three digits
+                        else:
+                            if padding % 3 == 0:
+                                content += str(padding) * padding/3
+                            elif padding %3 == 1:
+                                content += str(padding) * int((padding-1)/3)
+                                content += "*"
+                            else:
+                                content += str(padding) * int((padding-2)/3)
+                                content += "=="
+
 
                     if len(content) != 0:
                         self.send_msg(content, client)
