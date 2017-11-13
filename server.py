@@ -305,6 +305,7 @@ class Server:
 
 
     def recceiving(self, client, data):
+        print(data)
         """ Write a file to server """
 
         # decrypt the data
