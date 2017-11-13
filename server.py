@@ -312,7 +312,7 @@ class Server:
 
         # decrypt the data
         if self.CLIENTS[client]['cipher'] != "null":
-            data = self.decrypt(data)
+            data = self.decrypt(data, client)
 
         lastChar = data[-1]
         notLastBlock = False
@@ -322,7 +322,7 @@ class Server:
         # check if last block
         if "END" in content:
             print(self.timestamp() + "Client finished uploading")
-            
+
             msg = "END"
 
             self.send_msg(msg, client)

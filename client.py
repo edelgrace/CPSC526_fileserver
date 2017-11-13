@@ -313,11 +313,7 @@ class Client:
         except IOError as error:
             error = str(error) + "\n"
 
-            self.send_msg(error, client)
-
-            print(self.timestamp() + "Error: " + error)
-
-            self.CLIENTS[client]['status'] = "CLOSE"
+            sys.stderr.write("Error " + error)
 
         return
 
@@ -397,6 +393,22 @@ class Client:
 
         return
 
+    def done(self, data):
+        """ CHeck if done """
+        if self.CIPHER != "null":
+            data = self.decrypt(data)
+
+        data = data.decode("utf-8")
+        if "END" in data:
+            sys.stderr.write("OK")
+            sys.exit(0)
+            return
+        else:
+            sys.stderr.write("ERROR: File not sent")
+            sys.exit(0)
+
+        return
+
 
     def run(self):
         """ Run the client """
@@ -438,6 +450,9 @@ class Client:
                         # error state
                         sys.stderr.write("ERROR: \n")
 
+                    elif self.STATE == "DONE":
+                        self.done(data)
+
                 # no more data, close connection
                 else:
                     if self.STATE == "DONE":
@@ -467,5 +482,5 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         
         sys.exit(0)
-    except Exception as e:
-        sys.stderr.write("Error " + str(e))
+    # except Exception as e:
+    #     print(e)
