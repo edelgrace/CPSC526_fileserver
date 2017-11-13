@@ -160,7 +160,7 @@ class Server:
         if cipher != "null":
             # generate the IV
             iv = self.SECRET_KEY + nonce + "IV"
-            iv = hashlib.sha256(iv).hexdigest()
+            iv = hashlib.sha256(iv).hexdigest()[:16]
 
             # generate the session-key
             key = self.SECRET_KEY + nonce + "SK"
