@@ -90,9 +90,11 @@ class Client:
         unpadder = padding.PKCS7(128).unpadder()
         
         data = decryptor.update(data) + decryptor.finalize()
-        data = unpadder.update(data) + unpadder.finalize()
-
-        sys.stderr.write(data)
+        try:
+            data = unpadder.update(data) + unpadder.finalize()
+        except:
+            sys.stderr.write(data)
+        # sys.stderr.write(data)
 
         return data
 
@@ -107,8 +109,6 @@ class Client:
         # encrypt the message
         encryptor = self.ENC_DEC.encryptor()
         data = encryptor.update(data) + encryptor.finalize()
-
-        sys.stderr.write(data)
 
         return data
 

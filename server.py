@@ -87,7 +87,7 @@ class Server:
 
             # encrypt
             ct = encryptor.update(data) + encryptor.finalize()
-
+            print("DEBUG " + str(len(ct)))
             self.MESSAGES[sckt].put(ct)
 
         else:
