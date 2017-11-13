@@ -344,7 +344,7 @@ class Server:
 
                         # padding with three digits
                         else:
-                            print(content)
+                            print(padding)
                             if padding % 3 == 0:
                                 content += str(padding) * padding/3
                             elif padding %3 == 1:
