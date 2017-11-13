@@ -292,17 +292,19 @@ class Server:
         
         operation = data[0]
         filename = data[1]
+        self.CLIENTS[client]['file'] = filename
 
         # operation is to write a file
         if operation == "write":
-            self.write_file(client, filename)
+            self.CLIENTS[client]['status'] = "RECEIVING"
 
 
         # operation is to read a file
         else:
             self.read_file(client, filename)
 
-    def write_file(self, client, filename):
+
+    def recceiving(self, client, data):
         """ Write a file to server """
 
         # decrypt the data
@@ -367,15 +369,20 @@ class Server:
                 data = data[:0-lastChar]
                 self.LASTBLOCK = True
 
-        # write to stdout
-        # reference: https://pages.cpsc.ucalgary.ca/~henrique.pereira/pdfs/read.py
         if notLastBlock:
             self.LASTBLOCK = False
 
+        filename = self.CLIENTS[client]['file']
+
+        if os.path.exists(filename):
+            file = open(filename, 'wb')
+            file.close()
+
+        with open(filename, 'ab') as file:
+            file.write(data)
+
         return
 
-
-        return
 
     def read_file(self, client, filename):
         """ Read a file from server """
@@ -526,7 +533,9 @@ class Server:
 
                                 self.operation_request(data, sckt)
 
-                                self.CLIENTS[sckt]['status'] = "DONE"
+                            elif self.CLIENTS[sckt]['status'] == "RECEIVING":
+                                print(self.timestamp() + "5 Receiving a file")
+                                self.recceiving(sckt, data)
 
                             elif self.CLIENTS[sckt]['status'] == "DONE":
                                 print(self.timestamp() + "5 done")
