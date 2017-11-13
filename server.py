@@ -86,8 +86,8 @@ class Server:
 
             ct = encryptor.update(padded) + encryptor.finalize()
 
-
-
+            self.MESSAGES[sckt].put(ct)
+            
         else:
             if isinstance(data, (bytes, bytearray)):
                 self.MESSAGES[sckt].put(data)
