@@ -82,7 +82,7 @@ class Server:
             # padding
             padder = padding.PKCS7(128).padder()
             data = padder.update(data) + padder.finalize()
-            print(data)
+            print("DEBUG " + str(data))
 
             # encrypt
             data = encryptor.update(data) + encryptor.finalize()
@@ -245,7 +245,6 @@ class Server:
 
         print(self.timestamp() + "Computed response " + challenge + "-")
         print(self.timestamp() + "Actual response " + response + "-")
-        print(challenge==response)
 
         # challenge correct
         if str(challenge) == str(response):
@@ -327,7 +326,6 @@ class Server:
                 while content != b'':
                     # read 128 bits of the file
                     content = file.read(128)
-                    print("-" + str(content) + "-")
 
                     if len(content) < 128 and len(content) != 0:
                         padding = 128 - len(content)
@@ -357,7 +355,7 @@ class Server:
                                 content += str(padding) * int((padding-2)/3)
                                 content += "==="
                             
-                    print(content)
+                    print("DEBUG " + str(content))
                     if len(content) != 0:
                         self.send_msg(content, client)
 
