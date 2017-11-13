@@ -79,12 +79,14 @@ class Server:
             padder = padding.PKCS7(128).padder()
 
             if isinstance(data, (bytes, bytearray)):
-                padded = padder.update(bytearray(data,"utf-8")) + padder.finalize()
+                padded = padder.update(data) + padder.finalize()
             
             else:
-                padded = padder.update(data) + padder.finalize()
+                padded = padder.update(bytearray(data, "utf-8")) + padder.finalize()
 
             ct = encryptor.update(padded) + encryptor.finalize()
+
+
 
         else:
             if isinstance(data, (bytes, bytearray)):
