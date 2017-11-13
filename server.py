@@ -481,7 +481,7 @@ class Server:
                 try:
                     # grab the next message
                     next_msg = self.MESSAGES[sckt].get_nowait()
-
+                    print(next_msg)
                 except Queue.Empty:
                     self.OUTPUTS.remove(sckt)
                     
