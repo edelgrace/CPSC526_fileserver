@@ -141,10 +141,6 @@ class Server:
         
         print(self.timestamp() + "Handshake started")
         
-        # decrypt if needed
-        if self.CLIENTS[client]['cipher'] != "null":
-            data = self.decrypt(data)
-
         # receive nonce and cipher from client
         data = data.decode("utf-8")
         data = data.split(" ")
