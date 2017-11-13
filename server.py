@@ -62,14 +62,6 @@ class Server:
         if self.CLIENTS[sckt]['cipher'] != "null":
             backend = default_backend()
 
-            # generate the IV
-            iv = self.SECRET_KEY + self.CLIENTS[sckt]['nonce'] + "IV"
-            iv = hashlib.sha256(iv).hexdigest()
-
-            # generate the session-key
-            key = self.SECRET_KEY + self.CLIENTS[sckt]['nonce'] + "SK"
-            key = hashlib.sha256(key).hexdigest()
-
             # encrypt
             cipher = Cipher(algorithms.AES(key), modes.CBC(iv), backend=backend)
             encryptor = cipher.encryptor()
@@ -146,12 +138,21 @@ class Server:
         cipher = data[0]
         nonce = data[1]
         client_addr = client.getsockname()[0]
+        self.CLIENTS[client]['cipher'] = cipher
 
         print(self.timestamp() + "New connection from " + client_addr + ", cipher: " + cipher + ", nonce: " + nonce)
 
-        # TODO generate IVs and session-keys from nonce and cipher
-        self.CLIENTS[client]['IV'] = None
-        self.CLIENTS[client]['sessionkey'] = None
+        # check if cipher specified
+        if cipher != "null":
+            # generate the IV
+            iv = self.SECRET_KEY + nonce + "IV"
+            iv = hashlib.sha256(iv).hexdigest()
+            self.CLIENTS[client]['iv'] = iv
+
+            # generate the session-key
+            key = self.SECRET_KEY + nonce + "SK"
+            key = hashlib.sha256(key).hexdigest()
+            self.CLIENTS[client]['sk'] = key
 
         # generate a challenge
         # reference: https://stackoverflow.com/questions/37675280/how-to-generate-a-ranstring

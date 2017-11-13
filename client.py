@@ -99,24 +99,16 @@ class Client:
 
         self.CHALLENGE = data[1]
 
-        
-
         # generate message to send to server
         challenge = uuid.uuid4().hex
         msg = "You have been challenged: " + challenge
-
-        
 
         self.CLI_SOCKET.send(bytearray(msg, "utf-8"))
 
         # generate the response the server should reply with
         response = self.CHALLENGE + self.SECRET_KEY
 
-        
-
         self.RESPONSE = hashlib.sha224(response.encode("utf-8")).hexdigest()
-
-        
 
         # change the state
         self.STATE = "RESPONSE"
@@ -129,8 +121,6 @@ class Client:
         data = data.decode("utf-8").strip()
         data = data.split(": ")
         response = data[1]
-
-        
 
         # send response
         msg = "My response: " + self.RESPONSE
