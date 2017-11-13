@@ -314,6 +314,7 @@ class Client:
             error = str(error) + "\n"
 
             sys.stderr.write("Error " + error)
+            sys.exit(0)
 
         return
 
@@ -340,6 +341,10 @@ class Client:
             self.CLI_SOCKET.send(msg)
             
             self.STATE = "DONE"
+
+            sys.stderr.write("OK")
+            self.CLI_SOCKET.close()
+            sys.exit(0)
 
             return
 
@@ -390,7 +395,11 @@ class Client:
         # reference: https://pages.cpsc.ucalgary.ca/~henrique.pereira/pdfs/read.py
         if notLastBlock:
             sys.stdout.write("1")
+            sys.stdout.flush()
             self.LASTBLOCK = False
+
+        sys.stdout.write(data)
+        sys.stdout.flush()
 
         return
 
@@ -450,6 +459,7 @@ class Client:
                     elif self.STATE == "ERROR":
                         # error state
                         sys.stderr.write("ERROR: \n")
+                        sys.exit(0)
 
                     elif self.STATE == "DONE":
                         self.done(data)
