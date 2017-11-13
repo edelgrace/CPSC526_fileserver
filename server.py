@@ -335,7 +335,7 @@ class Server:
                             content += str(padding) * padding
                         
                         # padding with two digits
-                        elif padding >= 10 < 100:
+                        elif padding >= 10 and padding < 100:
                             print(padding)
                             if padding % 2 == 0:
                                 content += str(padding) * padding/2
