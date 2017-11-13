@@ -71,8 +71,6 @@ class Server:
 
     def send_msg(self, data, sckt):
         """ Function to send message to a socket """
-        print("DEBUG SEND")
-        print(data)
         if not isinstance(data, (bytes, bytearray)):
             data = bytes(data)
 
@@ -87,7 +85,6 @@ class Server:
 
             # encrypt
             ct = encryptor.update(data) + encryptor.finalize()
-            print("DEBUG " + str(len(ct)))
             self.MESSAGES[sckt].put(ct)
 
         else:
