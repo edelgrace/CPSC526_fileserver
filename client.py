@@ -96,7 +96,7 @@ class Client:
 
         data = unpadder.update(data) + unpadder.finalize()
         
-        sys.stderr.write(data)
+        #sys.stderr.write(data)
 
         return data
 

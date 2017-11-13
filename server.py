@@ -356,7 +356,7 @@ class Server:
                                 content += str(padding) * int((padding-2)/3)
                                 content += "==="
                             
-
+                    print(content)
                     if len(content) != 0:
                         self.send_msg(content, client)
 
