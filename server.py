@@ -56,11 +56,11 @@ class Server:
         return timestamp + " - "
 
     
-    def decrypt(self, data):
+    def decrypt(self, data, client):
         """ Decrypt a message """
 
         # decrypt the message
-        decryptor = self.ENC_DEC.decryptor()
+        decryptor = self.CLIENTS[client]['enc-dec'].decryptor()
         data = decryptor.update(data) + decryptor.finalize()
         
         unpadder = padding.PKCS7(128).unpadder()
@@ -76,26 +76,13 @@ class Server:
         cipher_chosen = self.CLIENTS[sckt]['cipher']
 
         if cipher_chosen != "null":
-            # grab the key and IV
-            key = self.CLIENTS[sckt]['sk']
-            iv = self.CLIENTS[sckt]['iv'][:16]
-
-            # change key depeneding on what cipher chosen
-            if cipher_chosen == "aes128":
-                key = key[:16]
-            else:
-                key = key[:32]
-
-            backend = default_backend()
-
-            # encrypt
-            cipher = Cipher(algorithms.AES(key), modes.CBC(iv), backend=backend)
-            encryptor = cipher.encryptor()
+            encryptor = self.CLIENTS[sckt]['enc-dec']
 
             # padding
             padder = padding.PKCS7(128).padder()
             data = padder.update(data) + padder.finalize()
 
+            # encrypt
             ct = encryptor.update(data) + encryptor.finalize()
 
             self.MESSAGES[sckt].put(ct)
@@ -174,12 +161,24 @@ class Server:
             # generate the IV
             iv = self.SECRET_KEY + nonce + "IV"
             iv = hashlib.sha256(iv).hexdigest()
-            self.CLIENTS[client]['iv'] = iv
 
             # generate the session-key
             key = self.SECRET_KEY + nonce + "SK"
             key = hashlib.sha256(key).hexdigest()
+            
+            # change key depeneding on what cipher chosen
+            if cipher_chosen == "aes128":
+                key = key[:16]
+            else:
+                key = key[:32]
+
+            self.CLIENTS[client]['iv'] = iv[:16]
             self.CLIENTS[client]['sk'] = key
+
+            backend = default_backend()
+
+            # encrypt
+            self.CLIENTS[client]['enc-dec'] = Cipher(algorithms.AES(key), modes.CBC(iv), backend=backend)
 
         # generate a challenge
         # reference: https://stackoverflow.com/questions/37675280/how-to-generate-a-ranstring
