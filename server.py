@@ -349,10 +349,10 @@ class Server:
                                 content += str(padding) * ((padding/3) - 1)
                                 content += "___"
                             elif padding %3 == 1:
-                                content += str(padding) * (int((padding-1)/3)-1)
+                                content += str(padding) * int((padding-1)/3)
                                 content += "***"
                             else:
-                                content += str(padding) * (int((padding-2)/3)-1)
+                                content += str(padding) * int((padding-2)/3)
                                 content += "==="
                             
 
