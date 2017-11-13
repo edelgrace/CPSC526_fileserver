@@ -329,14 +329,13 @@ class Server:
                     if len(content) < 128 and len(content) != 0:
                         padding = 128 - len(content)
                         content = content.decode("utf-8")
-                        print(padding)
+
                         # padding with one digit
                         if padding < 10:
                             content += str(padding) * padding
                         
                         # padding with two digits
                         elif padding >= 10 and padding < 100:
-                            print(padding)
                             if padding % 2 == 0:
                                 content += str(padding) * padding/2
                             else:
