@@ -468,7 +468,6 @@ class Server:
         data = data.decode("utf-8").strip()
 
         # close the connection
-        self.send_msg("END", client)
         self.CLIENTS[client]['status'] = "CLOSE"
 
         return

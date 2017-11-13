@@ -411,10 +411,10 @@ class Client:
         data = data.decode("utf-8")
         if "END" in data:
             sys.stderr.write("OK")
-            sys.exit(0)
             return
         else:
             sys.stderr.write("ERROR: File not sent")
+            self.CLI_SOCKET.close()
             sys.exit(0)
 
         return
@@ -459,6 +459,7 @@ class Client:
                     elif self.STATE == "ERROR":
                         # error state
                         sys.stderr.write("ERROR: \n")
+                        self.CLI_SOCKET.close()
                         sys.exit(0)
 
                     elif self.STATE == "DONE":
@@ -470,10 +471,11 @@ class Client:
                         sys.stderr.write("OK\n")
                     else:
                         sys.stderr.write("ERROR\n")
+                    self.CLI_SOCKET.close()
                     sys.exit(0)
 
         except KeyboardInterrupt:
-            
+            self.CLI_SOCKET.close()
             sys.exit(0)
 
 def run():
@@ -491,7 +493,7 @@ if __name__ == "__main__":
     try:
         run()
     except KeyboardInterrupt:
-        
+        self.CLI_SOCKET.close()
         sys.exit(0)
     # except Exception as e:
     #     print(e)
