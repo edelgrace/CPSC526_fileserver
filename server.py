@@ -66,8 +66,6 @@ class Server:
         unpadder = padding.PKCS7(128).unpadder()
         data = unpadder.update(data) + unpadder.finalize()
 
-        sys.stderr.write(data)
-
         return data
 
 

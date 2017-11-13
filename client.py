@@ -89,8 +89,6 @@ class Client:
         decryptor = self.ENC_DEC.decryptor()
         unpadder = padding.PKCS7(128).unpadder()
         
-        sys.stderr.write("DEBUG " + str(len(data)))
-
         data = decryptor.update(data) + decryptor.finalize()
 
         data = unpadder.update(data) + unpadder.finalize()
@@ -217,7 +215,7 @@ class Client:
             # self.CLI_SOCKET.close()
 
             # TODO print message
-            sys.stderr.write("ERROR: wrong key")
+            sys.stderr.write("ERROR: wrong key\n")
             sys.exit(0)
 
 
