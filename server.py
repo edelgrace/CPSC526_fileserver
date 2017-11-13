@@ -201,7 +201,7 @@ class Server:
 
         # decrypt if needed
         if self.CLIENTS[client]['cipher'] != "null":
-            data = self.decrypt(data)
+            data = self.decrypt(data, client)
 
         # receive the challenge
         data = data.decode("utf-8").strip()
@@ -228,7 +228,7 @@ class Server:
     def cliResponse(self, data, client):
         # decrypt if needed
         if self.CLIENTS[client]['cipher'] != "null":
-            data = self.decrypt(data)
+            data = self.decrypt(data, client)
 
         # get response from client
         data = data.decode("utf-8").strip()
@@ -264,7 +264,7 @@ class Server:
 
         # decrypt if needed
         if self.CLIENTS[client]['cipher'] != "null":
-            data = self.decrypt(data)
+            data = self.decrypt(data, client)
 
         # get the client response
         data = data.decode("utf-8")
@@ -288,7 +288,7 @@ class Server:
 
         # decrypt if needed
         if self.CLIENTS[client]['cipher'] != "null":
-            data = self.decrypt(data)
+            data = self.decrypt(data, client)
 
         # get the request
         data = data.decode("utf-8").strip()
@@ -367,7 +367,7 @@ class Server:
 
         # decrypt if needed
         if self.CLIENTS[client]['cipher'] != "null":
-            data = self.decrypt(data)
+            data = self.decrypt(data, client)
 
         # receive from client
         data = data.decode("utf-8").strip()
