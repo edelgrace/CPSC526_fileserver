@@ -63,7 +63,7 @@ class Server:
         if cipher_chosen != "null":
             # grab the key and IV
             key = self.CLIENTS[sckt]['sk']
-            iv = self.CLIENTS[sckt]['iv']
+            iv = self.CLIENTS[sckt]['iv'][:16]
 
             # change key depeneding on what cipher chosen
             if cipher_chosen == "aes128":
