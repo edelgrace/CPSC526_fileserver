@@ -356,6 +356,8 @@ class Server:
                     if len(content) != 0:
                         self.send_msg(content, client)
 
+
+                print(self.timestamp() + "File read is done")
                 self.CLIENTS[client]['status'] = "DONE"
                 self.send_msg(" END ", client)
 
