@@ -89,12 +89,11 @@ class Client:
         decryptor = self.ENC_DEC.decryptor()
         unpadder = padding.PKCS7(128).unpadder()
         
+        sys.stderr.write("DEBUG " + str(len(data)))
+
         data = decryptor.update(data) + decryptor.finalize()
-        try:
-            data = unpadder.update(data) + unpadder.finalize()
-        except:
-            sys.stderr.write(data)
-        # sys.stderr.write(data)
+
+        data = unpadder.update(data) + unpadder.finalize()
 
         return data
 
@@ -309,7 +308,7 @@ class Client:
 
         try:
             while True:
-                data = self.CLI_SOCKET.recv(128)
+                data = self.CLI_SOCKET.recv(144)
                 
                 if data:
                     # check if handshake done

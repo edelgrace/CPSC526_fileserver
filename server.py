@@ -73,6 +73,8 @@ class Server:
 
     def send_msg(self, data, sckt):
         """ Function to send message to a socket """
+        print("DEBUG SEND")
+        print(data)
         if not isinstance(data, (bytes, bytearray)):
             data = bytes(data)
 
