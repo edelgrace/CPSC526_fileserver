@@ -344,7 +344,7 @@ class Server:
                                 content += str(padding) * int((padding-1)/2)
                                 content += "-"
 
-                    print("DEBUG-" + str(content) + "-")
+                    print("DEBUG-" + str(content) + "-" + str(len(content)))
                     self.send_msg(content, client)
 
                 self.STATE = "DONE"
