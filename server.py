@@ -58,11 +58,18 @@ class Server:
 
     def send_msg(self, data, sckt):
         """ Function to send message to a socket """
+        cipher_chosen = self.CLIENTS[sckt]['cipher']
 
-        if self.CLIENTS[sckt]['cipher'] != "null":
+        if cipher_chosen != "null":
             # grab the key and IV
             key = self.CLIENTS[sckt]['sk']
             iv = self.CLIENTS[sckt]['iv']
+
+            # change key depeneding on what cipher chosen
+            if cipher_chosen == "aes128":
+                key = key[:16]
+            else:
+                key = key[:32]
 
             backend = default_backend()
 
