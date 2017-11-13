@@ -297,6 +297,7 @@ class Server:
         # operation is to write a file
         if operation == "write":
             self.CLIENTS[client]['status'] = "RECEIVING"
+            self.CLIENTS[client]['LASTBLOCK'] = False
             self.send_msg("OK", client)
 
 
