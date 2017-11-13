@@ -145,7 +145,7 @@ class Server:
             # put error on queue
             self.send_msg(error, client)
 
-            print("DEBUG handshake error")
+            print(self.timestamp() + "Handshake error")
 
             return
 
@@ -184,7 +184,6 @@ class Server:
         # reference: https://stackoverflow.com/questions/37675280/how-to-generate-a-ranstring
         challenge = uuid.uuid4().hex
         self.CLIENTS[client]['challenge'] = challenge
-        print("DEBUG handshake challenge")
 
         # put challenge onto the clients queue
         challenge = "You have been challenged: " + challenge + "\n"
@@ -209,12 +208,12 @@ class Server:
         
         challenge = data[1] + self.SECRET_KEY
         
-        print("DEBUG pre hash received challenge " + challenge)
+        print(self.timestamp() + "Pre hash received challenge " + challenge)
 
         # compute the response to the challenge
         my_response = hashlib.sha224(challenge.encode("utf-8")).hexdigest()
 
-        print("DEBU hash received challenge " + my_response)
+        print(self.timestamp() + "Hash received challenge " + my_response)
 
         # put message on queue
         my_response = "Server response: " + my_response + "\n"
@@ -238,12 +237,12 @@ class Server:
         # compute the client challenge
         challenge = self.CLIENTS[client]['challenge'] + self.SECRET_KEY
         
-        print("DEBUG challenge " + challenge)
+        print(self.timestamp() + "Challenge received " + challenge)
         
         challenge = hashlib.sha224(challenge.encode("utf-8")).hexdigest()
 
-        print("DEBUG computed-" + challenge + "-")
-        print("DEBUG response-" + response + "-")
+        print(self.timestamp() + "Computed response " + challenge + "-")
+        print(self.timestamp() + "Actual response " + response + "-")
         print(challenge==response)
 
         # challenge correct
@@ -315,9 +314,6 @@ class Server:
 
     def read_file(self, client, filename):
         """ Read a file from server """
-        print("DEBUG reading")
-        print("DEBUG reading" + filename)
-
 
         # open the file
         # reference: https://pages.cpsc.ucalgary.ca/~henrique.pereira/pdfs/read.py
@@ -334,7 +330,6 @@ class Server:
                         padding = 128 - len(content)
                         content = content.decode("utf-8")
 
-                        print("DEBUG " + str(padding))
                         if padding < 10:
                             content += str(padding) * padding
                         else:
@@ -351,14 +346,13 @@ class Server:
 
         # error occured
         except IOError as error:
-            print("DEBUG error")
             error = str(error) + "\n"
 
             self.send_msg(error, client)
 
-            self.CLIENTS[client]['status'] = "CLOSE"
+            print(self.timestamp() + "Error: " + error)
 
-        print("DEBUG reading done")
+            self.CLIENTS[client]['status'] = "CLOSE"
 
         return
 
@@ -413,7 +407,6 @@ class Server:
                 # client
                 else:
                     data = sckt.recv(1024)
-                    print("DEBUG data " + str(self.CLIENTS[sckt]))
 
                     # data to be received
                     if data:
@@ -422,60 +415,51 @@ class Server:
                         if self.CLIENTS[sckt] == {}:
                             print(self.timestamp() + "Commencing handshake")
                             self.handshake(data, sckt)
-                            print("DEBUG handshake exited")
+                            print(self.timestamp() + "Handshake exited")
 
                         # handshake already started or completed
                         else:
                             # close connection if error
                             if self.CLIENTS[sckt]['status'] == "CLOSE":
-                                print("DEBUG error")
                                 self.close_socket(sckt)
 
                             elif self.CLIENTS[sckt]['status'] == "CHALLENGED":
-                                print("DEBUG 1 challenged")
+                                print(self.timestamp() + "1 Client challenged")
                                 self.challenged(data, sckt)
-                                print("DEBUG challenge finished")
 
                             elif self.CLIENTS[sckt]['status'] == "CLI-RESPONSE":
-                                print("DEBUG 2 response")
+                                print(self.timestamp() + "2 response")
                                 self.cliResponse(data, sckt)
-                                print("DEBUG response finished")
                                 
                             elif self.CLIENTS[sckt]['status'] == "SVR-RESPONSE":
-                                print("DEBUG 3 server response")
+                                print(self.timestamp() + "3 server response")
                                 self.svr_response(data, sckt)
-                                print("DEBUG server response finished")
 
                             # client can freely communicate
                             elif self.CLIENTS[sckt]['status'] == "FREE":
-                                print("DEBUG 4 request")
-                                # put data in the queue
-                                # self.send_msg(data, sckt)
+                                print(self.timestamp() + "4 request")
 
                                 self.operation_request(data, sckt)
 
                                 self.CLIENTS[sckt]['status'] = "DONE"
 
-                                print("DEBUG request done")
-
                             elif self.CLIENTS[sckt]['status'] == "DONE":
-                                print("DEBUG done")
+                                print(self.timestamp() + "5 done")
                                 
                                 self.done(data, sckt)
 
                             elif data.decode("utf-8").split() == "END":
                                 print("CLIENT SENT END")
+
                             else:
                                 print("____________HELP" + data.decode("utf-8"))
 
                     # no more data = close connection
                     else: 
-                        print("DEBUG close")
                         self.close_socket(sckt)
         
             # go through outputs
             for sckt in writable:
-                print("DEBUG input" + sckt.getsockname()[0])
                 try:
                     # grab the next message
                     next_msg = self.MESSAGES[sckt].get_nowait()
