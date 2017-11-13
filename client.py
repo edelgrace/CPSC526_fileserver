@@ -290,8 +290,11 @@ class Client:
                 data = data[:0-lastChar]
                 self.LASTBLOCK = True
 
+        elif lastChar == "_":
+            lastChar = data[-6:-4]
+
         elif lastChar == "*":
-            lastChar = data[-4:-1]
+            lastChar = data[-4:-2]
 
             if lastChar.isdigit():
                 lastChar = int(lastChar)
@@ -299,8 +302,8 @@ class Client:
                 self.LASTBLOCK = True
 
         elif lastChar == "=":
-            lastChar = data[-5:6]
-            
+            lastChar = data[-5:-3]
+
             if lastChar.isdigit():
                 lastChar = int(lastChar)
                 data = data[:0-lastChar]

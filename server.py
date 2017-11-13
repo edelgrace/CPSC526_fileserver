@@ -346,7 +346,8 @@ class Server:
                         else:
                             print(padding)
                             if padding % 3 == 0:
-                                content += str(padding) * padding/3
+                                content += str(padding) * ((padding/3) - 1)
+                                content += "___"
                             elif padding %3 == 1:
                                 content += str(padding) * int((padding-1)/3)
                                 content += "*"
