@@ -328,7 +328,7 @@ class Server:
 
             return
 
-        if self.LASTBLOCK:
+        if self.CLIENTS[client]['LASTBLOCK']:
             notLastBlock = True
 
         if lastChar.isdigit():
@@ -342,7 +342,7 @@ class Server:
                 
             if index * -1 == lastChar:
                 data = data[:index]
-                self.LASTBLOCK = True
+                self.CLIENTS[client]['LASTBLOCK'] = True
 
         if lastChar == "-":
             lastChar = data[-3:-1]
@@ -350,7 +350,7 @@ class Server:
             if lastChar.isdigit():
                 lastChar = int(lastChar)
                 data = data[:0-lastChar]
-                self.LASTBLOCK = True
+                self.CLIENTS[client]['LASTBLOCK'] = True
 
         elif lastChar == "_":
             lastChar = data[-6:-4]
@@ -361,7 +361,7 @@ class Server:
             if lastChar.isdigit():
                 lastChar = int(lastChar)
                 data = data[:0-lastChar]
-                self.LASTBLOCK = True
+                self.CLIENTS[client]['LASTBLOCK'] = True
 
         elif lastChar == "=":
             lastChar = data[-5:-3]
@@ -369,10 +369,10 @@ class Server:
             if lastChar.isdigit():
                 lastChar = int(lastChar)
                 data = data[:0-lastChar]
-                self.LASTBLOCK = True
+                self.CLIENTS[client]['LASTBLOCK'] = True
 
         if notLastBlock:
-            self.LASTBLOCK = False
+            self.CLIENTS[client]['LASTBLOCK'] = False
 
         filename = self.CLIENTS[client]['file']
 
