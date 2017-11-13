@@ -506,7 +506,7 @@ class Server:
 
                 # client
                 else:
-                    data = sckt.recv(128)
+                    data = sckt.recv(144)
 
                     # data to be received
                     if data:
