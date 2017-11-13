@@ -382,6 +382,9 @@ class Server:
             file = open(filename, 'wb')
             file.close()
 
+            
+            self.CLIENTS[client]['FIRSTBLOCK'] = False
+
         with open(filename, 'ab') as file:
             file.write(data)
 
