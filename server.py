@@ -76,7 +76,7 @@ class Server:
         cipher_chosen = self.CLIENTS[sckt]['cipher']
 
         if cipher_chosen != "null":
-            encryptor = self.CLIENTS[sckt]['enc-dec']
+            encryptor = self.CLIENTS[sckt]['enc-dec'].encryptor()
 
             # padding
             padder = padding.PKCS7(128).padder()
