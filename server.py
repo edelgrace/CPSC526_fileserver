@@ -74,8 +74,6 @@ class Server:
         if not isinstance(data, (bytes, bytearray)):
             data = bytes(data)
 
-        print(data)
-
         cipher_chosen = self.CLIENTS[sckt]['cipher']
 
         # encrypt if needed
@@ -510,6 +508,9 @@ class Server:
                 # client
                 else:
                     data = sckt.recv(144)
+
+
+                    print(data)
 
                     # data to be received
                     if data:
