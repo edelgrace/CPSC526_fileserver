@@ -587,7 +587,10 @@ def run():
     svr.setup()
 
     while True:
-        svr.run()
+        try:
+            svr.run()
+        except socket.error:
+            print(svr.timestamp() + "Connection closed")
 
 # run the program
 if __name__ == "__main__":
