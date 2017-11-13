@@ -86,6 +86,7 @@ class Server:
             # encrypt
             ct = encryptor.update(data) + encryptor.finalize()
             self.MESSAGES[sckt].put(ct)
+            print(str(len(ct)))
 
         else:
             if isinstance(data, (bytes, bytearray)):
@@ -344,7 +345,6 @@ class Server:
 
                         # padding with three digits
                         else:
-                            print(padding)
                             if padding % 3 == 0:
                                 content += str(padding) * ((padding/3) - 1)
                                 content += "___"
@@ -357,7 +357,6 @@ class Server:
                             
 
                     if len(content) != 0:
-                        print("-" + str(content) + "-")
                         self.send_msg(content, client)
 
                 self.STATE = "DONE"
