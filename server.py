@@ -478,7 +478,7 @@ class Server:
                 try:
                     # grab the next message
                     next_msg = self.MESSAGES[sckt].get_nowait()
-                    print("DEBUG=" + str(next_msg) + "=")
+
                 except Queue.Empty:
                     self.OUTPUTS.remove(sckt)
                     
@@ -486,9 +486,10 @@ class Server:
                     if self.CLIENTS[sckt]['status'] == "CLOSE":
                         self.close_socket(sckt)
 
-
                 else:
                     # send the message
+                    print("DEBUG " + str(len(next_msg)))
+                    print("DEBUG+" + str(next_msg) + "+")
                     sckt.send(next_msg)
 
 
