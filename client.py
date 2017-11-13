@@ -85,20 +85,16 @@ class Client:
     def decrypt(self, data):
         """ Decrypt a message """
 
-        # decrypt the message
-        try:
-            decryptor = self.ENC_DEC.decryptor()
-            unpadder = padding.PKCS7(128).unpadder()
 
-            sys.stderr.write(str(len(data)) + "\n")
-            sys.stderr.write("\n")
+        decryptor = self.ENC_DEC.decryptor()
+        unpadder = padding.PKCS7(128).unpadder()
 
-            data = decryptor.update(data) + decryptor.finalize()
+        sys.stderr.write(str(len(data)) + "\n")
+        sys.stderr.write("\n")
 
-            data = unpadder.update(data) + unpadder.finalize()
-        except:
-            sys.stderr.write(data)
-        #sys.stderr.write(data)
+        data = decryptor.update(data) + decryptor.finalize()
+
+        data = unpadder.update(data) + unpadder.finalize()
 
         return data
 
