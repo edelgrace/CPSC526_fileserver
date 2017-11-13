@@ -343,7 +343,7 @@ class Server:
                             else:
                                 content += str(padding) * int((padding-1)/2)
                                 content += "-"
-
+                    print("DEBUG" + str(content))
                     self.send_msg(content, client)
 
                 self.STATE = "DONE"
