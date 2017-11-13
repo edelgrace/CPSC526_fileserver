@@ -344,6 +344,7 @@ class Server:
 
                         # padding with three digits
                         else:
+                            print(content)
                             if padding % 3 == 0:
                                 content += str(padding) * padding/3
                             elif padding %3 == 1:
@@ -352,7 +353,6 @@ class Server:
                             else:
                                 content += str(padding) * int((padding-2)/3)
                                 content += "=="
-
 
                     if len(content) != 0:
                         self.send_msg(content, client)
