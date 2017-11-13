@@ -307,8 +307,7 @@ class Server:
             self.read_file(client, filename)
 
 
-    def recceiving(self, client, data):
-        print(data)
+    def receiving(self, client, data):
         """ Write a file to server """
 
         # decrypt the data
@@ -322,6 +321,8 @@ class Server:
 
         # check if last block
         if "END" in content:
+            print(self.timestamp() + "Client finished uploading")
+            
             msg = "END"
 
             self.send_msg(msg, client)
@@ -542,7 +543,7 @@ class Server:
 
                             elif self.CLIENTS[sckt]['status'] == "RECEIVING":
                                 print(self.timestamp() + "5 Receiving a file")
-                                self.recceiving(sckt, data)
+                                self.receiving(sckt, data)
 
                             elif self.CLIENTS[sckt]['status'] == "DONE":
                                 print(self.timestamp() + "5 done")
