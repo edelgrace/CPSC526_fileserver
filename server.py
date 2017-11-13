@@ -327,6 +327,7 @@ class Server:
                 while content != b'':
                     # read 128 bits of the file
                     content = file.read(128)
+                    print("-" + str(content) + "-")
 
                     if len(content) < 128 and len(content) != 0:
                         padding = 128 - len(content)
