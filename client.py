@@ -86,16 +86,18 @@ class Client:
         """ Decrypt a message """
 
         # decrypt the message
-        decryptor = self.ENC_DEC.decryptor()
-        unpadder = padding.PKCS7(128).unpadder()
+        try:
+            decryptor = self.ENC_DEC.decryptor()
+            unpadder = padding.PKCS7(128).unpadder()
 
-        sys.stderr.write(str(len(data)) + "\n")
-        sys.stderr.write("\n")
+            sys.stderr.write(str(len(data)) + "\n")
+            sys.stderr.write("\n")
 
-        data = decryptor.update(data) + decryptor.finalize()
+            data = decryptor.update(data) + decryptor.finalize()
 
-        data = unpadder.update(data) + unpadder.finalize()
-        
+            data = unpadder.update(data) + unpadder.finalize()
+        except:
+            sys.stderr.write(data)
         #sys.stderr.write(data)
 
         return data

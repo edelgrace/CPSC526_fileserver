@@ -58,14 +58,14 @@ class Server:
     
     def decrypt(self, data, client):
         """ Decrypt a message """
-
+        
         # decrypt the message
         decryptor = self.CLIENTS[client]['enc-dec'].decryptor()
         data = decryptor.update(data) + decryptor.finalize()
         
         unpadder = padding.PKCS7(128).unpadder()
         data = unpadder.update(data) + unpadder.finalize()
-
+            
         return data
 
 
@@ -87,6 +87,7 @@ class Server:
             # encrypt
             data = encryptor.update(data) + encryptor.finalize()
             self.MESSAGES[sckt].put(data)
+            print("DEBUG " + str(data))
 
         else:
             self.MESSAGES[sckt].put(data)
