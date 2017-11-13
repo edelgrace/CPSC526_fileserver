@@ -28,6 +28,10 @@ class Client:
     RESPONSE = None
     FIRSTBLOCK = 0
     LASTBLOCK = False
+    IV = None
+    SK = None
+    ENC_DEC = None
+
 
     def parse(self):
         """ Parse the arguments """
@@ -77,12 +81,47 @@ class Client:
         return
 
     
+    def decrypt(self, data):
+        """ Decrypt a message """
+
+        # decrypt the message
+        decryptor = self.ENC_DEC.decryptor()
+        data = decryptor.update(data) + decryptor.finalize()
+        
+        unpadder = padding.PKCS7(128).unpadder()
+        data = unpadder.update(data) + unpadder.finalize()
+        
+        sys.stderr.write(data)
+
+        return data
+
     def handshake(self):
         """ Start the handshake process """
 
         # send the cipher and nonce
         nonce = uuid.uuid4().hex
+        nonce = nonce[:16]
         msg = self.CIPHER + " " + nonce
+
+        # calculate IV and session key
+        if self.CIPHER != "null":
+            iv = self.SECRET_KEY + nonce + "IV"
+            iv = hashlib.sha256(iv).hexdigest()
+            self.IV = iv[:16]
+
+            # generate the session-key
+            key = self.SECRET_KEY + nonce + "SK"
+            key = hashlib.sha256(key).hexdigest()
+            self.SK = key
+
+            if self.CIPHER == "aes128":
+                self.SK = self.SK[:16]
+            else:
+                self.SK = self.SK[:32]
+
+            # create the cipher
+            backend = default_backend()
+            self.ENC_DEC = Cipher(algorithms.AES(self.KEY), modes.CBC(self.IV), backend=backend)
 
         self.CLI_SOCKET.send(bytearray(msg, "utf-8"))
 
@@ -92,6 +131,10 @@ class Client:
 
     def challenge(self, data):
         """ Receive and send challenge to server """
+
+        # decrypt the data
+        if self.CIPHER != "null":
+            data = self.decrypt(data)
 
         # parse the data from the server
         data = data.decode("utf-8").strip()
@@ -117,6 +160,10 @@ class Client:
     def response(self, data):
         """ Receive data from the server """
 
+        # decrypt the data
+        if self.CIPHER != "null":
+            data = self.decrypt(data)
+
         # receive the data from the server
         data = data.decode("utf-8").strip()
         data = data.split(": ")
@@ -132,10 +179,13 @@ class Client:
     def authenticate(self, data):
         """ TODO """
 
+        # decrypt the data
+        if self.CIPHER != "null":
+            data = self.decrypt(data)
+
         # receive data from the server
         response = data.decode("utf-8").strip()
         
-
         # TODO comment
         if "OK" in response:
             self.CLI_SOCKET.send(bytearray("OK", "utf-8"))
@@ -178,12 +228,15 @@ class Client:
     def receiving(self, data):
         """ Receive data from the server """
 
+        # decrypt the data
+        if self.CIPHER != "null":
+            data = self.decrypt(data)
+
         lastChar = data[-1]
         notLastBlock = False
 
         content = unicode(data, errors='ignore').strip()
 
-        
         if content == "END":
             self.CLI_SOCKET.send(bytearray("END", "utf-8"))
             
