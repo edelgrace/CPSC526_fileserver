@@ -80,15 +80,15 @@ class Server:
             encryptor = self.CLIENTS[sckt]['enc-dec'].encryptor()
 
             # padding
-            print("DEBUG " + str(data))
             padder = padding.PKCS7(128).padder()
             data = padder.update(data) + padder.finalize()
             print(data)
+
             # encrypt
-            ct = encryptor.update(data) + encryptor.finalize()
-            self.MESSAGES[sckt].put(ct)
-            print("DEBUG " + str(len(ct)))
-            print(ct)
+            data = encryptor.update(data) + encryptor.finalize()
+            self.MESSAGES[sckt].put(data)
+            print("DEBUG " + str(len(data)))
+            print(data)
 
         else:
             if isinstance(data, (bytes, bytearray)):
