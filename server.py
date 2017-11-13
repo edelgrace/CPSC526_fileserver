@@ -298,6 +298,7 @@ class Server:
         if operation == "write":
             self.CLIENTS[client]['status'] = "RECEIVING"
             self.CLIENTS[client]['LASTBLOCK'] = False
+            self.CLIENTS[client]['FIRSTBLOCK'] = True
             self.send_msg("OK", client)
 
 
@@ -377,7 +378,7 @@ class Server:
 
         filename = self.CLIENTS[client]['file']
 
-        if os.path.exists(filename):
+        if os.path.exists(filename) and self.CLIENTS[client]['FIRSTBLOCK']:
             file = open(filename, 'wb')
             file.close()
 

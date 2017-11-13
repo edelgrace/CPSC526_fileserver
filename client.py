@@ -307,6 +307,8 @@ class Client:
 
                 self.CLI_SOCKET.send(msg)
 
+                self.STATE = "DONE"
+
         # error occured
         except IOError as error:
             error = str(error) + "\n"
