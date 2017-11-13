@@ -312,6 +312,8 @@ class Server:
     def read_file(self, client, filename):
         """ Read a file from server """
 
+        print(self.timestamp() + "Client requested" + filename)
+
         # open the file
         # reference: https://pages.cpsc.ucalgary.ca/~henrique.pereira/pdfs/read.py
         try:

@@ -73,7 +73,7 @@ class Client:
             self.CLI_SOCKET.connect((self.IP_ADDR, self.PORT))
         
         except Exception as e:
-            
+            sys.stderr.write("Error: " + str(e))
             sys.exit(0)
 
         # start the handshake
@@ -84,17 +84,21 @@ class Client:
     
     def decrypt(self, data):
         """ Decrypt a message """
+        sys.stderr.write(data)
+        if self.UNCOMPLETEDBLOCK != None:
+            data = self.UNCOMPLETEDBLOCK + data
+            self.UNCOMPLETEDBLOCK = None
 
+        # decrypt the message
+        try:
+            decryptor = self.ENC_DEC.decryptor()
+            unpadder = padding.PKCS7(128).unpadder()
 
-        decryptor = self.ENC_DEC.decryptor()
-        unpadder = padding.PKCS7(128).unpadder()
+            data = decryptor.update(data) + decryptor.finalize()
 
-        sys.stderr.write(str(len(data)) + "\n")
-        sys.stderr.write("\n")
-
-        data = decryptor.update(data) + decryptor.finalize()
-
-        data = unpadder.update(data) + unpadder.finalize()
+            data = unpadder.update(data) + unpadder.finalize()
+        except Exception as e:
+            self.UNCOMPLETEDBLOCK = data
 
         return data
 
