@@ -60,6 +60,10 @@ class Server:
         """ Function to send message to a socket """
 
         if self.CLIENTS[sckt]['cipher'] != "null":
+            # grab the key and IV
+            key = self.CLIENTS[sckt]['sk']
+            iv = self.CLIENTS[sckt]['iv']
+
             backend = default_backend()
 
             # encrypt
