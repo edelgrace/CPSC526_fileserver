@@ -330,7 +330,6 @@ class Server:
                         padding = 128 - len(content)
                         content = content.decode("utf-8")
 
-                        print(padding)
                         # padding with one digit
                         if padding < 10:
                             content += str(padding) * padding
@@ -345,6 +344,7 @@ class Server:
 
                         # padding with three digits
                         else:
+                            print(padding)
                             if padding % 3 == 0:
                                 content += str(padding) * padding/3
                             elif padding %3 == 1:
