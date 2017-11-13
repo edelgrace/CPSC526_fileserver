@@ -80,13 +80,14 @@ class Server:
             encryptor = self.CLIENTS[sckt]['enc-dec'].encryptor()
 
             # padding
+            print("DEBUG " + str(data))
             padder = padding.PKCS7(128).padder()
             data = padder.update(data) + padder.finalize()
 
             # encrypt
             ct = encryptor.update(data) + encryptor.finalize()
             self.MESSAGES[sckt].put(ct)
-            print(str(len(ct)))
+            print("DEBUG " + str(len(ct)))
             print(ct)
 
         else:
