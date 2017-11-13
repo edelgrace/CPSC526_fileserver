@@ -84,7 +84,6 @@ class Client:
     
     def decrypt(self, data):
         """ Decrypt a message """
-        sys.stderr.write(data)
         if self.UNCOMPLETEDBLOCK != None:
             data = self.UNCOMPLETEDBLOCK + data
             self.UNCOMPLETEDBLOCK = None
@@ -166,7 +165,9 @@ class Client:
         # generate message to send to server
         challenge = uuid.uuid4().hex
         msg = "You have been challenged: " + challenge
-        msg = self.encrypt(msg)
+
+        if self.CIPHER != "null":
+            msg = self.encrypt(msg)
 
         self.CLI_SOCKET.send(msg)
 
@@ -193,7 +194,10 @@ class Client:
 
         # send response
         msg = "My response: " + self.RESPONSE
-        msg = self.encrypt(msg)
+        
+        if self.CIPHER != "null":
+            msg = self.encrypt(msg)
+        
         self.CLI_SOCKET.send(msg)
 
         self.STATE = "AUTHENTICATE"
@@ -212,7 +216,10 @@ class Client:
         # TODO comment
         if "OK" in response:
             msg = "OK"
-            msg = self.encrypt(msg)
+
+            if self.CIPHER != "null":
+                msg = self.encrypt(msg)
+
             self.CLI_SOCKET.send(msg)
 
             self.STATE = "REQUEST"
@@ -231,7 +238,9 @@ class Client:
 
         # construct the message
         msg = self.OPERATION + " " + self.FILENAME
-        msg = self.encrypt(msg)
+
+        if self.CIPHER != "null":
+            msg = self.encrypt(msg)
 
         # send the message
         self.CLI_SOCKET.send(msg)
@@ -264,9 +273,12 @@ class Client:
         content = unicode(data, errors='ignore').strip()
 
         # check if last block
-        if content == "END":
+        if "END" in content:
             msg = "END"
-            msg = self.encrypt(msg)
+
+            if self.CIPHER != "null":
+                msg = self.encrypt(msg)
+            
             self.CLI_SOCKET.send(msg)
             
             self.STATE = "DONE"
@@ -319,11 +331,8 @@ class Client:
         # write to stdout
         # reference: https://pages.cpsc.ucalgary.ca/~henrique.pereira/pdfs/read.py
         if notLastBlock:
-            sys.stdout.write("1")
             self.LASTBLOCK = False
 
-        sys.stdout.write(data)
-        
         return
 
 
@@ -334,7 +343,6 @@ class Client:
             while True:
                 data = self.CLI_SOCKET.recv(144)
                 
-                sys.stderr.write(data)
                 if data:
                     # check if handshake done
                     if self.STATE == "CHALLENGE":
@@ -397,3 +405,5 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         
         sys.exit(0)
+    except Exception as e:
+        sys.stderr.write("Error " + str(e))
