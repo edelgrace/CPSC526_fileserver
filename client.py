@@ -93,6 +93,22 @@ class Client:
 
         return data
 
+
+    def encrypt(self, data):
+        """ Encrypt a message """
+
+        # padding if needed
+        padder = padding.PKCS7(128).padder()
+        data = padder.update(data) + padder.finalize()
+
+        # encrypt the message
+        encryptor = self.ENC_DEC.encryptor()
+        data = encryptor.update(data) + encryptor.finalize()
+
+        sys.stderr.write(data)
+
+        return data
+
     def handshake(self):
         """ Start the handshake process """
 
@@ -143,8 +159,9 @@ class Client:
         # generate message to send to server
         challenge = uuid.uuid4().hex
         msg = "You have been challenged: " + challenge
+        msg = self.encrypt(msg)
 
-        self.CLI_SOCKET.send(bytearray(msg, "utf-8"))
+        self.CLI_SOCKET.send(msg)
 
         # generate the response the server should reply with
         response = self.CHALLENGE + self.SECRET_KEY
@@ -169,7 +186,8 @@ class Client:
 
         # send response
         msg = "My response: " + self.RESPONSE
-        self.CLI_SOCKET.send(bytearray(msg, "utf-8"))
+        msg = self.encrypt(msg)
+        self.CLI_SOCKET.send(msg)
 
         self.STATE = "AUTHENTICATE"
 
@@ -186,7 +204,9 @@ class Client:
         
         # TODO comment
         if "OK" in response:
-            self.CLI_SOCKET.send(bytearray("OK", "utf-8"))
+            msg = "OK"
+            msg = self.encrypt(msg)
+            self.CLI_SOCKET.send(msg)
 
             self.STATE = "REQUEST"
 
@@ -204,9 +224,10 @@ class Client:
 
         # construct the message
         msg = self.OPERATION + " " + self.FILENAME
+        msg = self.encrypt(msg)
 
         # send the message
-        self.CLI_SOCKET.send(bytearray(msg, "utf-8"))
+        self.CLI_SOCKET.send(msg)
 
         # change the state appropriately
         if self.OPERATION == "read":
@@ -235,8 +256,11 @@ class Client:
 
         content = unicode(data, errors='ignore').strip()
 
+        # check if last block
         if content == "END":
-            self.CLI_SOCKET.send(bytearray("END", "utf-8"))
+            msg = "END"
+            msg = self.encrypt(msg)
+            self.CLI_SOCKET.send(msg)
             
             self.STATE = "DONE"
 

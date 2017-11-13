@@ -55,6 +55,21 @@ class Server:
         # return timestamp
         return timestamp + " - "
 
+    
+    def decrypt(self, data):
+        """ Decrypt a message """
+
+        # decrypt the message
+        decryptor = self.ENC_DEC.decryptor()
+        data = decryptor.update(data) + decryptor.finalize()
+        
+        unpadder = padding.PKCS7(128).unpadder()
+        data = unpadder.update(data) + unpadder.finalize()
+
+        sys.stderr.write(data)
+
+        return data
+
 
     def send_msg(self, data, sckt):
         """ Function to send message to a socket """
@@ -123,7 +138,13 @@ class Server:
 
     def handshake(self, data, client):
         """ Guides through the initial steps of the protocol """
-        print("DEBUG handshake")
+        
+        print(self.timestamp() + "Handshake started")
+        
+        # decrypt if needed
+        if self.CLIENTS[client]['cipher'] != "null":
+            data = self.decrypt(data)
+
         # receive nonce and cipher from client
         data = data.decode("utf-8")
         data = data.split(" ")
@@ -179,6 +200,10 @@ class Server:
     def challenged(self, data, client):
         """ Receive challenge and compute response """
 
+        # decrypt if needed
+        if self.CLIENTS[client]['cipher'] != "null":
+            data = self.decrypt(data)
+
         # receive the challenge
         data = data.decode("utf-8").strip()
         data = data.split(": ")
@@ -202,6 +227,10 @@ class Server:
         return
 
     def cliResponse(self, data, client):
+        # decrypt if needed
+        if self.CLIENTS[client]['cipher'] != "null":
+            data = self.decrypt(data)
+
         # get response from client
         data = data.decode("utf-8").strip()
         data = data.split(": ")
@@ -234,6 +263,10 @@ class Server:
     def svr_response(self, data, client):
         """ Check if the server had a correct response """
 
+        # decrypt if needed
+        if self.CLIENTS[client]['cipher'] != "null":
+            data = self.decrypt(data)
+
         # get the client response
         data = data.decode("utf-8")
         data = data.strip("\n")
@@ -253,7 +286,11 @@ class Server:
 
     def operation_request(self, data, client):
         """ Handle the client request """
-        
+
+        # decrypt if needed
+        if self.CLIENTS[client]['cipher'] != "null":
+            data = self.decrypt(data)
+
         # get the request
         data = data.decode("utf-8").strip()
         data = data.split(" ")
@@ -329,6 +366,10 @@ class Server:
     def done(self, data, client):
         """ Check if done """
 
+        # decrypt if needed
+        if self.CLIENTS[client]['cipher'] != "null":
+            data = self.decrypt(data)
+
         # receive from client
         data = data.decode("utf-8").strip()
 
@@ -373,9 +414,7 @@ class Server:
                 # client
                 else:
                     data = sckt.recv(1024)
-                    print("DEBUG data")
                     print("DEBUG data " + str(self.CLIENTS[sckt]))
-                    print("DEBUG data-" + data.decode("utf-8"))
 
                     # data to be received
                     if data:
