@@ -47,6 +47,7 @@ class Client:
         parser.add_argument('port', type=int)
         parser.add_argument('cipher', choices=['null', 'aes256', 'aes128'])
         parser.add_argument('key')
+        parser.add_argument('--infile', nargs='?', type=argparse.FileType('r'), default=sys.stdin)
 
         # parse the arguments
         arguments = parser.parse_args()
@@ -256,6 +257,65 @@ class Client:
 
     def sending(self, data):
         """ Upload a file to the server """
+
+        try:
+            with open(self.FILENAME, 'rb') as file:
+                content = None
+
+                # read the file
+                while content != b'':
+                    # read 128 bits of the file
+                    content = file.read(128)
+
+                    if len(content) < 128 and len(content) != 0:
+                        padding = 128 - len(content)
+                        content = content.decode("utf-8")
+
+                        # padding with one digit
+                        if padding < 10:
+                            content += str(padding) * padding
+                        
+                        # padding with two digits
+                        elif padding >= 10 and padding < 100:
+                            if padding % 2 == 0:
+                                content += str(padding) * padding/2
+                            else:
+                                content += str(padding) * int((padding-1)/2)
+                                content += "-"
+
+                        # padding with three digits
+                        else:
+                            if padding % 3 == 0:
+                                content += str(padding) * ((padding/3) - 1)
+                                content += "___"
+                            elif padding %3 == 1:
+                                content += str(padding) * (int((padding-1)/3)-1)
+                                content += "***"
+                            else:
+                                content += str(padding) * int((padding-2)/3)
+                                content += "==="
+                    # send content
+                    if len(content) != 0:
+                        if self.CIPHER != "null":
+                            content = self.encrypt(content)
+                        self.CLI_SOCKET.send(content)
+
+                msg = "END"
+
+                if self.CIPHER != "null":
+                    msg = self.encrypt(msg)
+
+                self.CLI_SOCKET.send(msg)
+
+        # error occured
+        except IOError as error:
+            error = str(error) + "\n"
+
+            self.send_msg(error, client)
+
+            print(self.timestamp() + "Error: " + error)
+
+            self.CLIENTS[client]['status'] = "CLOSE"
 
         return
 

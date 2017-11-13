@@ -305,6 +305,74 @@ class Server:
     def write_file(self, client, filename):
         """ Write a file to server """
 
+        # decrypt the data
+        if self.CLIENTS[client]['cipher'] != "null":
+            data = self.decrypt(data)
+
+        lastChar = data[-1]
+        notLastBlock = False
+
+        content = unicode(data, errors='ignore').strip()
+
+        # check if last block
+        if "END" in content:
+            msg = "END"
+
+            self.send_msg(msg, client)
+            
+            self.STATE = "DONE"
+
+            return
+
+        if self.LASTBLOCK:
+            notLastBlock = True
+
+        if lastChar.isdigit():
+            index = -1
+            lastChar = int(lastChar)
+            while index != lastChar:
+                if data[0-index] == lastChar:
+                    index -= 1
+                else:
+                    break
+                
+            if index * -1 == lastChar:
+                data = data[:index]
+                self.LASTBLOCK = True
+
+        if lastChar == "-":
+            lastChar = data[-3:-1]
+            
+            if lastChar.isdigit():
+                lastChar = int(lastChar)
+                data = data[:0-lastChar]
+                self.LASTBLOCK = True
+
+        elif lastChar == "_":
+            lastChar = data[-6:-4]
+
+        elif lastChar == "*":
+            lastChar = data[-4:-2]
+
+            if lastChar.isdigit():
+                lastChar = int(lastChar)
+                data = data[:0-lastChar]
+                self.LASTBLOCK = True
+
+        elif lastChar == "=":
+            lastChar = data[-5:-3]
+
+            if lastChar.isdigit():
+                lastChar = int(lastChar)
+                data = data[:0-lastChar]
+                self.LASTBLOCK = True
+
+        # write to stdout
+        # reference: https://pages.cpsc.ucalgary.ca/~henrique.pereira/pdfs/read.py
+        if notLastBlock:
+            self.LASTBLOCK = False
+
+        return
 
 
         return
