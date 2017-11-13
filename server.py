@@ -375,6 +375,7 @@ class Server:
                 self.CLIENTS[client]['LASTBLOCK'] = True
 
         if notLastBlock:
+            data = "1" + data
             self.CLIENTS[client]['LASTBLOCK'] = False
 
         filename = self.CLIENTS[client]['file']

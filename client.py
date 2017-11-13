@@ -389,6 +389,7 @@ class Client:
         # write to stdout
         # reference: https://pages.cpsc.ucalgary.ca/~henrique.pereira/pdfs/read.py
         if notLastBlock:
+            sys.stdout.write("1")
             self.LASTBLOCK = False
 
         return
