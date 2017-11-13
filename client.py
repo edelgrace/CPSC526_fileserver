@@ -31,6 +31,7 @@ class Client:
     LASTBLOCK = False
     IV = None
     SK = None
+    UNCOMPLETEDBLOCK = None
     ENC_DEC = None
 
 
@@ -57,7 +58,6 @@ class Client:
         self.PORT = arguments.port
         self.CIPHER = arguments.cipher
         self.SECRET_KEY = arguments.key
-
         return
 
 
@@ -90,11 +90,13 @@ class Client:
         unpadder = padding.PKCS7(128).unpadder()
 
         sys.stderr.write(str(len(data)) + "\n")
-        sys.stderr.write(data)
         sys.stderr.write("\n")
+
         data = decryptor.update(data) + decryptor.finalize()
 
         data = unpadder.update(data) + unpadder.finalize()
+        
+        sys.stderr.write(data)
 
         return data
 

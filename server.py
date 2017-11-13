@@ -360,8 +360,8 @@ class Server:
                     if len(content) != 0:
                         self.send_msg(content, client)
 
-                self.STATE = "DONE"
-                self.send_msg("END", client)
+                self.CLIENTS[client]['status'] = "DONE"
+                self.send_msg(" END ", client)
 
         # error occured
         except IOError as error:
