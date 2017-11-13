@@ -83,7 +83,7 @@ class Server:
             print("DEBUG " + str(data))
             padder = padding.PKCS7(128).padder()
             data = padder.update(data) + padder.finalize()
-
+            print(data)
             # encrypt
             ct = encryptor.update(data) + encryptor.finalize()
             self.MESSAGES[sckt].put(ct)
