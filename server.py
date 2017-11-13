@@ -76,6 +76,7 @@ class Server:
 
         cipher_chosen = self.CLIENTS[sckt]['cipher']
 
+        # encrypt if needed
         if cipher_chosen != "null":
             encryptor = self.CLIENTS[sckt]['enc-dec'].encryptor()
 
@@ -87,12 +88,10 @@ class Server:
             data = encryptor.update(data) + encryptor.finalize()
             self.MESSAGES[sckt].put(data)
             print("DEBUG " + str(len(data)))
+            print("DEBUG~" + str(data) + "~")
 
         else:
-            if isinstance(data, (bytes, bytearray)):
-                self.MESSAGES[sckt].put(data)
-            else:
-                self.MESSAGES[sckt].put(bytearray(data, "utf-8"))
+            self.MESSAGES[sckt].put(data)
 
         # add to the outputs
         if sckt not in self.OUTPUTS:
@@ -479,7 +478,7 @@ class Server:
                 try:
                     # grab the next message
                     next_msg = self.MESSAGES[sckt].get_nowait()
-                    print("DEBUG " + str(next_msg))
+                    print("DEBUG=" + str(next_msg) + "=")
                 except Queue.Empty:
                     self.OUTPUTS.remove(sckt)
                     
