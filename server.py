@@ -87,8 +87,6 @@ class Server:
             # encrypt
             data = encryptor.update(data) + encryptor.finalize()
             self.MESSAGES[sckt].put(data)
-            print("DEBUG " + str(len(data)))
-            print("DEBUG~" + str(data) + "~")
 
         else:
             self.MESSAGES[sckt].put(data)
@@ -488,8 +486,6 @@ class Server:
 
                 else:
                     # send the message
-                    print("DEBUG " + str(len(next_msg)))
-                    print("DEBUG+" + str(next_msg) + "+")
                     sckt.send(next_msg)
 
 
