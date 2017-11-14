@@ -318,7 +318,7 @@ class Server:
         notLastBlock = False
 
         content = unicode(data, errors='ignore').strip()
-
+        print(content)
         # check if last block
         if "END" in content:
             print(self.timestamp() + "Client finished uploading")
