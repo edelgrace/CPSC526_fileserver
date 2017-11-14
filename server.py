@@ -591,6 +591,7 @@ def run():
         try:
             svr.run()
         except Exception as e:
+            print(svr.timestamp() + "Error: " + str(e))
             continue
 
 # run the program
