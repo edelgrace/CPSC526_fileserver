@@ -388,7 +388,6 @@ class Server:
             self.CLIENTS[client]['FIRSTBLOCK'] = False
 
         with open(filename, 'ab') as file:
-            print(self.timestamp() + "Writing file")
             file.write(data)
 
         return
@@ -543,7 +542,6 @@ class Server:
                                 self.operation_request(data, sckt)
 
                             elif self.CLIENTS[sckt]['status'] == "RECEIVING":
-                                print(self.timestamp() + "5 Receiving a file")
                                 self.receiving(sckt, data)
 
                             elif self.CLIENTS[sckt]['status'] == "DONE":
