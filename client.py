@@ -395,8 +395,8 @@ class Client:
         # reference: https://pages.cpsc.ucalgary.ca/~henrique.pereira/pdfs/read.py
         if notLastBlock:
             sys.stdout.write("1")
-            sys.stdout.flush()
             self.LASTBLOCK = False
+
 
         sys.stdout.write(data)
         sys.stdout.flush()
@@ -411,6 +411,8 @@ class Client:
         data = data.decode("utf-8")
         if "END" in data:
             sys.stderr.write("OK")
+            self.CLI_SOCKET.close()
+            sys.exit(0)
             return
         else:
             sys.stderr.write("ERROR: File not sent")

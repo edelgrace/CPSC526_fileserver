@@ -388,6 +388,7 @@ class Server:
             self.CLIENTS[client]['FIRSTBLOCK'] = False
 
         with open(filename, 'ab') as file:
+            print(self.timestamp() + "Writing file")
             file.write(data)
 
         return
